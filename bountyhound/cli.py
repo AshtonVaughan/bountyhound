@@ -39,9 +39,9 @@ def doctor() -> None:
         config_path = tools_config.get(tool)
         path = find_tool(tool, config_path)
         if path:
-            console.print(f"  [green]\u2713[/green] {tool}: {path}")
+            console.print(f"  [green][+][/green] {tool}: {path}")
         else:
-            console.print(f"  [red]\u2717[/red] {tool}: not found")
+            console.print(f"  [red][x][/red] {tool}: not found")
             all_required_found = False
 
     # Check optional tools
@@ -50,9 +50,9 @@ def doctor() -> None:
         config_path = tools_config.get(tool)
         path = find_tool(tool, config_path)
         if path:
-            console.print(f"  [green]\u2713[/green] {tool}: {path}")
+            console.print(f"  [green][+][/green] {tool}: {path}")
         else:
-            console.print(f"  [yellow]-[/yellow] {tool}: not found (optional)")
+            console.print(f"  [yellow][-][/yellow] {tool}: not found (optional)")
 
     console.print()
     if all_required_found:
