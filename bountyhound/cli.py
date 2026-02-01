@@ -183,5 +183,87 @@ def status() -> None:
     console.print(table)
 
 
+@main.command()
+@click.argument("domain")
+@click.option("--batch", is_flag=True, help="Run in batch mode (no interactive output)")
+def recon(domain: str, batch: bool):
+    """Run reconnaissance on a target domain."""
+    db = Database()
+    db.initialize()
+
+    # Ensure target exists
+    if not db.get_target(domain):
+        db.add_target(domain)
+        if not batch:
+            console.print(f"[green][+][/green] Added new target: {domain}")
+
+    from bountyhound.pipeline import PipelineRunner
+
+    runner = PipelineRunner(db, batch_mode=batch)
+    results = runner.run_recon(domain)
+    db.close()
+
+    if not batch:
+        console.print(f"\n[bold]Recon Summary:[/bold]")
+        console.print(f"  Subdomains: {results['subdomains']}")
+        console.print(f"  Live hosts: {results['live_hosts']}")
+        console.print(f"  Open ports: {results['ports']}")
+
+
+@main.command()
+@click.argument("domain")
+@click.option("--batch", is_flag=True, help="Run in batch mode (no interactive output)")
+def scan(domain: str, batch: bool):
+    """Run vulnerability scan on a target domain."""
+    db = Database()
+    db.initialize()
+
+    target = db.get_target(domain)
+    if not target:
+        console.print(f"[red]Target {domain} not found. Add it first with 'target add'.[/red]")
+        db.close()
+        return
+
+    from bountyhound.pipeline import PipelineRunner
+
+    runner = PipelineRunner(db, batch_mode=batch)
+    results = runner.run_scan(domain)
+    db.close()
+
+    if not batch:
+        console.print(f"\n[bold]Scan Summary:[/bold]")
+        console.print(f"  Critical: {results.get('critical', 0)}")
+        console.print(f"  High: {results.get('high', 0)}")
+        console.print(f"  Medium: {results.get('medium', 0)}")
+        console.print(f"  Low: {results.get('low', 0)}")
+
+
+@main.command()
+@click.argument("domain")
+@click.option("--batch", is_flag=True, help="Run in batch mode (no interactive output)")
+def pipeline(domain: str, batch: bool):
+    """Run full pipeline (recon + scan) on a target domain."""
+    db = Database()
+    db.initialize()
+
+    # Ensure target exists
+    if not db.get_target(domain):
+        db.add_target(domain)
+        if not batch:
+            console.print(f"[green][+][/green] Added new target: {domain}")
+
+    from bountyhound.pipeline import PipelineRunner
+
+    runner = PipelineRunner(db, batch_mode=batch)
+    results = runner.run_pipeline(domain)
+    db.close()
+
+    if not batch:
+        console.print(f"\n[bold]Pipeline Summary for {domain}:[/bold]")
+        console.print(f"  Subdomains: {results.get('subdomains', 0)}")
+        console.print(f"  Live hosts: {results.get('live_hosts', 0)}")
+        console.print(f"  Findings: critical={results.get('critical', 0)}, high={results.get('high', 0)}, medium={results.get('medium', 0)}")
+
+
 if __name__ == "__main__":
     main()

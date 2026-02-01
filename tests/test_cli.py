@@ -33,3 +33,16 @@ def test_status_command_runs():
     with runner.isolated_filesystem():
         result = runner.invoke(status)
         assert result.exit_code == 0
+
+
+def test_recon_command_requires_target():
+    runner = CliRunner()
+    result = runner.invoke(main, ["recon"])
+    # Should error without domain argument
+    assert result.exit_code != 0
+
+
+def test_pipeline_command_requires_target():
+    runner = CliRunner()
+    result = runner.invoke(main, ["pipeline"])
+    assert result.exit_code != 0
