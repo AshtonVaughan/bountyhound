@@ -1,0 +1,187 @@
+"""CLI commands for BountyHound."""
+
+from pathlib import Path
+
+import click
+from rich.console import Console
+from rich.table import Table
+
+from bountyhound import __version__
+from bountyhound.config import load_config
+from bountyhound.storage import Database
+from bountyhound.utils import find_tool
+
+REQUIRED_TOOLS = ["subfinder", "httpx", "nmap", "nuclei"]
+OPTIONAL_TOOLS = ["ffuf"]
+
+console = Console()
+
+
+@click.group()
+@click.version_option(version=__version__, prog_name="bountyhound")
+def main() -> None:
+    """Bug bounty automation CLI."""
+    pass
+
+
+@main.command()
+def doctor() -> None:
+    """Check tool dependencies and system configuration."""
+    console.print("\n[bold]Checking tool dependencies...[/bold]\n")
+
+    config = load_config()
+    tools_config = config.get("tools", {})
+
+    # Check required tools
+    console.print("[bold]Required tools:[/bold]")
+    all_required_found = True
+    for tool in REQUIRED_TOOLS:
+        config_path = tools_config.get(tool)
+        path = find_tool(tool, config_path)
+        if path:
+            console.print(f"  [green]\u2713[/green] {tool}: {path}")
+        else:
+            console.print(f"  [red]\u2717[/red] {tool}: not found")
+            all_required_found = False
+
+    # Check optional tools
+    console.print("\n[bold]Optional tools:[/bold]")
+    for tool in OPTIONAL_TOOLS:
+        config_path = tools_config.get(tool)
+        path = find_tool(tool, config_path)
+        if path:
+            console.print(f"  [green]\u2713[/green] {tool}: {path}")
+        else:
+            console.print(f"  [yellow]-[/yellow] {tool}: not found (optional)")
+
+    console.print()
+    if all_required_found:
+        console.print("[green]All required tools are installed![/green]")
+    else:
+        console.print(
+            "[red]Some required tools are missing. "
+            "Install them or configure paths in ~/.bountyhound/config.yaml[/red]"
+        )
+
+
+@main.group()
+def target() -> None:
+    """Manage bug bounty targets."""
+    pass
+
+
+@target.command("add")
+@click.argument("domain")
+def target_add(domain: str) -> None:
+    """Add a target domain."""
+    db_path = Path.cwd() / "bountyhound.db"
+    db = Database(db_path)
+    db.initialize()
+
+    target_id = db.add_target(domain)
+    db.close()
+
+    console.print(f"[green]Added target:[/green] {domain} (id: {target_id})")
+
+
+@target.command("list")
+def target_list() -> None:
+    """List all target domains."""
+    db_path = Path.cwd() / "bountyhound.db"
+    db = Database(db_path)
+    db.initialize()
+
+    targets = db.get_all_targets()
+    db.close()
+
+    if not targets:
+        console.print("[yellow]No targets found. Use 'bountyhound target add <domain>' to add one.[/yellow]")
+        return
+
+    table = Table(title="Targets")
+    table.add_column("ID", style="cyan")
+    table.add_column("Domain", style="green")
+    table.add_column("Added", style="white")
+    table.add_column("Last Recon", style="white")
+    table.add_column("Last Scan", style="white")
+
+    for t in targets:
+        table.add_row(
+            str(t.id),
+            t.domain,
+            t.added_at.strftime("%Y-%m-%d %H:%M"),
+            t.last_recon.strftime("%Y-%m-%d %H:%M") if t.last_recon else "-",
+            t.last_scan.strftime("%Y-%m-%d %H:%M") if t.last_scan else "-",
+        )
+
+    console.print(table)
+
+
+@target.command("remove")
+@click.argument("domain")
+def target_remove(domain: str) -> None:
+    """Remove a target domain."""
+    db_path = Path.cwd() / "bountyhound.db"
+    db = Database(db_path)
+    db.initialize()
+
+    existing = db.get_target(domain)
+    if existing is None:
+        console.print(f"[red]Target not found:[/red] {domain}")
+        db.close()
+        return
+
+    # Delete the target and associated data
+    conn = db.connect()
+    conn.execute("DELETE FROM findings WHERE subdomain_id IN (SELECT id FROM subdomains WHERE target_id = ?)", (existing.id,))
+    conn.execute("DELETE FROM ports WHERE subdomain_id IN (SELECT id FROM subdomains WHERE target_id = ?)", (existing.id,))
+    conn.execute("DELETE FROM subdomains WHERE target_id = ?", (existing.id,))
+    conn.execute("DELETE FROM runs WHERE target_id = ?", (existing.id,))
+    conn.execute("DELETE FROM targets WHERE id = ?", (existing.id,))
+    conn.commit()
+    db.close()
+
+    console.print(f"[green]Removed target:[/green] {domain}")
+
+
+@main.command()
+def status() -> None:
+    """Show status of all targets with subdomain and finding counts."""
+    db_path = Path.cwd() / "bountyhound.db"
+    db = Database(db_path)
+    db.initialize()
+
+    targets = db.get_all_targets()
+
+    if not targets:
+        console.print("[yellow]No targets found. Use 'bountyhound target add <domain>' to add one.[/yellow]")
+        db.close()
+        return
+
+    table = Table(title="Target Status")
+    table.add_column("Domain", style="cyan")
+    table.add_column("Subdomains", style="green", justify="right")
+    table.add_column("Critical", style="red", justify="right")
+    table.add_column("High", style="yellow", justify="right")
+    table.add_column("Medium", style="blue", justify="right")
+    table.add_column("Low", style="white", justify="right")
+
+    for t in targets:
+        subdomain_count = db.get_subdomain_count(t.id)
+        finding_counts = db.get_finding_count(t.id)
+
+        table.add_row(
+            t.domain,
+            str(subdomain_count),
+            str(finding_counts.get("critical", 0)),
+            str(finding_counts.get("high", 0)),
+            str(finding_counts.get("medium", 0)),
+            str(finding_counts.get("low", 0)),
+        )
+
+    db.close()
+    console.print(table)
+
+
+if __name__ == "__main__":
+    main()
