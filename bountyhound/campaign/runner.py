@@ -12,7 +12,6 @@ from bountyhound.campaign.bugcrowd import BugcrowdParser
 from bountyhound.campaign.intigriti import IntigritiParser
 from bountyhound.campaign.yeswehack import YesWeHackParser
 from bountyhound.pipeline.runner import PipelineRunner
-from bountyhound.report.generators import ReportGenerator
 from bountyhound.storage import Database
 
 
@@ -212,17 +211,20 @@ class CampaignRunner:
 
                 # Collect recon data for AI selection
                 target = db.get_target(domain)
-                if target:
-                    subdomains = db.get_subdomains(target.id)
-                    for sub in subdomains:
-                        all_recon_data["subdomains"].append(sub.hostname)
-                        if sub.status_code:
-                            all_recon_data["live_hosts"].append({
-                                "host": sub.hostname,
-                                "status_code": sub.status_code,
-                                "technologies": sub.technologies or [],
-                                "ip": sub.ip_address,
-                            })
+                if target is None:
+                    continue
+                subdomains = db.get_subdomains(target.id)
+                if subdomains is None:
+                    continue
+                for sub in subdomains:
+                    all_recon_data["subdomains"].append(sub.hostname)
+                    if sub.status_code:
+                        all_recon_data["live_hosts"].append({
+                            "host": sub.hostname,
+                            "status_code": sub.status_code,
+                            "technologies": sub.technologies or [],
+                            "ip": sub.ip_address,
+                        })
 
             self.log(
                 f"[+] Recon complete: {recon_results['subdomains']} subdomains, "
@@ -239,15 +241,26 @@ class CampaignRunner:
                 "green",
             )
 
-            # Step 8: Run vulnerability scans on selected targets
+            # Step 8: Run vulnerability scans on selected targets only
             self.log("[*] Running vulnerability scans...", "blue")
             scan_results = {"critical": 0, "high": 0, "medium": 0, "low": 0, "info": 0}
 
-            # Run scans on the original domains (which have subdomains)
+            # Extract target hostnames from AI selection
+            selected_hostnames = {t.get("target") for t in selected_targets if t.get("target")}
+
+            # Run scans only on selected targets
             for domain in domains:
-                result = pipeline.run_scan(domain)
-                for key in scan_results:
-                    scan_results[key] += result.get(key, 0)
+                target = db.get_target(domain)
+                if target is None:
+                    continue
+                subdomains = db.get_subdomains(target.id)
+                if subdomains is None:
+                    continue
+                for sub in subdomains:
+                    if sub.hostname in selected_hostnames:
+                        result = pipeline.run_scan(sub.hostname)
+                        for key in scan_results:
+                            scan_results[key] += result.get(key, 0)
 
             self.log(
                 f"[+] Scan complete: {scan_results.get('critical', 0)} critical, "
@@ -261,16 +274,19 @@ class CampaignRunner:
             all_findings = []
             for domain in domains:
                 target = db.get_target(domain)
-                if target:
-                    findings = db.get_findings(target.id)
-                    for f in findings:
-                        all_findings.append({
-                            "name": f.name,
-                            "severity": f.severity,
-                            "url": f.url,
-                            "evidence": f.evidence,
-                            "template": f.template,
-                        })
+                if target is None:
+                    continue
+                findings = db.get_findings(target.id)
+                if findings is None:
+                    continue
+                for f in findings:
+                    all_findings.append({
+                        "name": f.name,
+                        "severity": f.severity,
+                        "url": f.url,
+                        "evidence": f.evidence,
+                        "template": f.template,
+                    })
 
             prioritized_findings = ai.prioritize_findings(all_findings)
             self.log(f"[+] Prioritized {len(prioritized_findings)} findings", "green")

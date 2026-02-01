@@ -82,12 +82,10 @@ class TestCampaignRunner:
     @patch("bountyhound.campaign.runner.AIAnalyzer")
     @patch("bountyhound.campaign.runner.Database")
     @patch("bountyhound.campaign.runner.PipelineRunner")
-    @patch("bountyhound.campaign.runner.ReportGenerator")
     @patch("bountyhound.campaign.runner.detect_platform")
     def test_run_orchestrates_full_flow(
         self,
         mock_detect_platform,
-        mock_report_gen,
         mock_pipeline_runner,
         mock_db_class,
         mock_ai_class,
@@ -138,10 +136,6 @@ class TestCampaignRunner:
             "info": 5,
         }
         mock_pipeline_runner.return_value = mock_pipeline
-
-        mock_report = MagicMock()
-        mock_report.generate_markdown.return_value = "# Report"
-        mock_report_gen.return_value = mock_report
 
         # Run the campaign
         runner = CampaignRunner(batch_mode=True)
@@ -194,12 +188,10 @@ class TestCampaignRunner:
     @patch("bountyhound.campaign.runner.AIAnalyzer")
     @patch("bountyhound.campaign.runner.Database")
     @patch("bountyhound.campaign.runner.PipelineRunner")
-    @patch("bountyhound.campaign.runner.ReportGenerator")
     @patch("bountyhound.campaign.runner.detect_platform")
     def test_run_pipeline_on_targets(
         self,
         mock_detect_platform,
-        mock_report_gen,
         mock_pipeline_runner,
         mock_db_class,
         mock_ai_class,
@@ -222,8 +214,15 @@ class TestCampaignRunner:
         mock_ai.generate_report_summary.return_value = "Summary"
         mock_ai_class.return_value = mock_ai
 
+        # Create mock subdomain that matches AI-selected target
+        mock_subdomain = MagicMock()
+        mock_subdomain.hostname = "api.example.com"
+        mock_subdomain.status_code = 200
+        mock_subdomain.technologies = []
+        mock_subdomain.ip_address = "1.2.3.4"
+
         mock_db = MagicMock()
-        mock_db.get_subdomains.return_value = []
+        mock_db.get_subdomains.return_value = [mock_subdomain]
         mock_db.get_findings.return_value = []
         mock_db_class.return_value = mock_db
 
@@ -231,9 +230,6 @@ class TestCampaignRunner:
         mock_pipeline.run_recon.return_value = {"subdomains": 0, "live_hosts": 0, "ports": 0}
         mock_pipeline.run_scan.return_value = {}
         mock_pipeline_runner.return_value = mock_pipeline
-
-        mock_report = MagicMock()
-        mock_report_gen.return_value = mock_report
 
         runner = CampaignRunner(batch_mode=True)
 
@@ -252,7 +248,8 @@ class TestCampaignRunner:
 
         # Verify pipeline was called for domains
         mock_pipeline.run_recon.assert_called()
-        mock_pipeline.run_scan.assert_called()
+        # Verify scan was called on AI-selected target (not original domain)
+        mock_pipeline.run_scan.assert_called_with("api.example.com")
 
 
 class TestCampaignRunnerIntegration:
