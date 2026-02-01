@@ -2,5 +2,6 @@
 
 from bountyhound.recon.subdomains import SubdomainScanner
 from bountyhound.recon.httpx import HttpProber
+from bountyhound.recon.ports import PortScanner
 
-__all__ = ["SubdomainScanner", "HttpProber"]
+__all__ = ["SubdomainScanner", "HttpProber", "PortScanner"]
