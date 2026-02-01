@@ -265,5 +265,30 @@ def pipeline(domain: str, batch: bool):
         console.print(f"  Findings: critical={results.get('critical', 0)}, high={results.get('high', 0)}, medium={results.get('medium', 0)}")
 
 
+@main.command()
+@click.argument("domain")
+@click.option("--format", "-f", type=click.Choice(["markdown", "json"]), default="markdown", help="Report format")
+@click.option("--output", "-o", type=click.Path(), help="Output directory")
+def report(domain: str, format: str, output: str | None):
+    """Generate a report for a target domain."""
+    db = Database()
+    db.initialize()
+
+    target = db.get_target(domain)
+    if not target:
+        console.print(f"[red]Target {domain} not found.[/red]")
+        db.close()
+        return
+
+    from bountyhound.report import ReportGenerator
+
+    generator = ReportGenerator(db)
+    output_dir = Path(output) if output else None
+    filepath = generator.save_report(domain, output_dir=output_dir, format=format)
+    db.close()
+
+    console.print(f"[green][+][/green] Report saved to: {filepath}")
+
+
 if __name__ == "__main__":
     main()
