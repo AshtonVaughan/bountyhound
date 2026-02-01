@@ -12,8 +12,10 @@ from bountyhound.storage.models import Target, Subdomain, Port, Finding, Run
 class Database:
     """SQLite database wrapper for storing targets, subdomains, and findings."""
 
-    def __init__(self, db_path: Path) -> None:
+    def __init__(self, db_path: Path | None = None) -> None:
         """Initialize database with path, creating parent directories if needed."""
+        if db_path is None:
+            db_path = Path.home() / ".bountyhound" / "bountyhound.db"
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._connection: Optional[sqlite3.Connection] = None
