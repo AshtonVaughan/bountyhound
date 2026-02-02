@@ -266,6 +266,61 @@ def pipeline(domain: str, batch: bool):
 
 
 @main.command()
+@click.argument("url")
+@click.option("--browser", "-b", type=click.Choice(["chrome", "firefox", "edge"]), default=None, help="Browser to extract cookies from (default: from config or chrome)")
+@click.option("--max-targets", "-m", type=int, default=None, help="Maximum targets to scan after AI selection (default: from config or 100)")
+@click.option("--batch", is_flag=True, help="Run in batch mode (no interactive output)")
+def campaign(url: str, browser: str | None, max_targets: int | None, batch: bool):
+    """Run autonomous campaign scan from a bug bounty program URL.
+
+    Fetches the campaign page using browser cookies, parses scope,
+    runs reconnaissance, uses AI to select high-value targets,
+    performs vulnerability scanning, and generates a prioritized report.
+
+    Supported platforms: HackerOne, Bugcrowd, Intigriti, YesWeHack
+    """
+    from bountyhound.campaign import CampaignRunner
+
+    # Load defaults from config
+    config = load_config()
+    campaign_config = config.get("campaign", {})
+
+    # Use config defaults if options not provided
+    if browser is None:
+        browser = campaign_config.get("browser", "chrome")
+    if max_targets is None:
+        max_targets = campaign_config.get("max_targets", 100)
+
+    runner = CampaignRunner(
+        browser_type=browser,
+        max_targets=max_targets,
+        batch_mode=batch,
+    )
+
+    try:
+        results = runner.run(url)
+
+        if not batch:
+            console.print(f"\n[bold]Campaign Summary for {results.get('program_name', 'Unknown')}:[/bold]")
+            console.print(f"  Platform: {results.get('platform', 'unknown')}")
+            console.print(f"  Domains: {len(results.get('domains', []))}")
+            console.print(f"  Subdomains: {results.get('recon', {}).get('subdomains', 0)}")
+            console.print(f"  Selected targets: {len(results.get('selected_targets', []))}")
+
+            scan = results.get("scan", {})
+            console.print(
+                f"  Findings: critical={scan.get('critical', 0)}, "
+                f"high={scan.get('high', 0)}, medium={scan.get('medium', 0)}"
+            )
+
+            console.print(f"\n[bold]AI Summary:[/bold]")
+            console.print(results.get("summary", "No summary available."))
+    except ValueError as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise SystemExit(1)
+
+
+@main.command()
 @click.argument("domain")
 @click.option("--format", "-f", type=click.Choice(["markdown", "json"]), default="markdown", help="Report format")
 @click.option("--output", "-o", type=click.Path(), help="Output directory")

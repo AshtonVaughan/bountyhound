@@ -14,6 +14,7 @@ class Config(BaseModel):
     rate_limits: dict[str, int]
     output: dict[str, str]
     scan: dict[str, Any] | None = None
+    campaign: dict[str, Any] | None = None
     api_keys: dict[str, str] | None = None
 
     model_config = {"extra": "allow"}
@@ -42,10 +43,15 @@ def get_default_config() -> dict[str, Any]:
             "directory": "~/.bountyhound/results",
             "format": "markdown",
         },
+        "campaign": {
+            "browser": "chrome",
+            "max_targets": 100,
+        },
         "api_keys": {
             "shodan": "",
             "censys": "",
             "virustotal": "",
+            "groq": "",
         },
     }
 

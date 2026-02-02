@@ -46,3 +46,38 @@ def test_pipeline_command_requires_target():
     runner = CliRunner()
     result = runner.invoke(main, ["pipeline"])
     assert result.exit_code != 0
+
+
+def test_campaign_command_shows_in_help():
+    runner = CliRunner()
+    result = runner.invoke(main, ["--help"])
+    assert result.exit_code == 0
+    assert "campaign" in result.output
+
+
+def test_campaign_command_requires_url():
+    runner = CliRunner()
+    result = runner.invoke(main, ["campaign"])
+    # Should error without URL argument
+    assert result.exit_code != 0
+
+
+def test_campaign_command_has_browser_option():
+    runner = CliRunner()
+    result = runner.invoke(main, ["campaign", "--help"])
+    assert result.exit_code == 0
+    assert "--browser" in result.output
+
+
+def test_campaign_command_has_max_targets_option():
+    runner = CliRunner()
+    result = runner.invoke(main, ["campaign", "--help"])
+    assert result.exit_code == 0
+    assert "--max-targets" in result.output
+
+
+def test_campaign_command_has_batch_option():
+    runner = CliRunner()
+    result = runner.invoke(main, ["campaign", "--help"])
+    assert result.exit_code == 0
+    assert "--batch" in result.output
