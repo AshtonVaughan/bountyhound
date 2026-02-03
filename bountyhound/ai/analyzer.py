@@ -5,16 +5,16 @@ from typing import Optional
 
 from groq import Groq
 
-from bountyhound.config import Config
+from bountyhound.config import load_config
 
 
 class AIAnalyzer:
     """AI analyzer using Groq for intelligent bug bounty assistance."""
 
-    def __init__(self, config: Optional[Config] = None) -> None:
+    def __init__(self, config: dict | None = None) -> None:
         """Initialize with Groq API key from config."""
-        self.config = config or Config.load()
-        api_key = self.config.api_keys.get("groq")
+        self.config = config or load_config()
+        api_key = self.config.get("api_keys", {}).get("groq")
         if not api_key:
             raise ValueError("Groq API key not found in config. Add it to ~/.bountyhound/config.yaml")
         self.client = Groq(api_key=api_key)
@@ -174,6 +174,39 @@ Keep it under 500 words. Use markdown formatting."""
         Returns:
             Dict with selected targets, scores, and reasoning
         """
+        # Pre-filter data to avoid token limits
+        # Priority keywords for pre-filtering
+        priority_keywords = [
+            "admin", "api", "dev", "test", "staging", "internal", "beta",
+            "portal", "dashboard", "login", "auth", "gateway", "graphql",
+            "jenkins", "gitlab", "jira", "confluence", "vpn", "mail",
+        ]
+
+        total_subdomains = len(recon_data.get("subdomains", []))
+        live_hosts = recon_data.get("live_hosts", [])
+
+        # If we have live hosts, prioritize those
+        if live_hosts:
+            # Limit to 500 live hosts max for AI analysis
+            filtered_data = {
+                "live_hosts": live_hosts[:500],
+                "total_live": len(live_hosts),
+            }
+        else:
+            # No live hosts - pre-filter subdomains by priority keywords
+            subdomains = recon_data.get("subdomains", [])
+            priority_subs = [s for s in subdomains if any(kw in s.lower() for kw in priority_keywords)]
+            other_subs = [s for s in subdomains if s not in priority_subs]
+
+            # Take all priority subs (up to 300) + sample of others (up to 200)
+            selected_subs = priority_subs[:300] + other_subs[:200]
+
+            filtered_data = {
+                "subdomains": selected_subs,
+                "total_subdomains": total_subdomains,
+                "note": f"Pre-filtered from {total_subdomains} total subdomains",
+            }
+
         system_prompt = f"""You are a bug bounty target prioritization expert. Analyze reconnaissance data and select the {max_targets} highest-value targets for vulnerability scanning.
 
 Prioritize targets with:
@@ -196,7 +229,7 @@ Return ONLY valid JSON:
 
 Select at most {max_targets} targets. Higher score = higher priority."""
 
-        user_prompt = f"Analyze and select high-value targets:\n{json.dumps(recon_data, indent=2)}"
+        user_prompt = f"Analyze and select high-value targets:\n{json.dumps(filtered_data, indent=2)}"
 
         response = self._chat(system_prompt, user_prompt)
 

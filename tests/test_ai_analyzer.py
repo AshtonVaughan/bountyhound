@@ -10,12 +10,10 @@ class TestAIAnalyzer:
     """Tests for AIAnalyzer class."""
 
     @patch("bountyhound.ai.analyzer.Groq")
-    @patch("bountyhound.ai.analyzer.Config")
-    def test_select_targets_returns_limited_list(self, mock_config_class, mock_groq):
+    @patch("bountyhound.ai.analyzer.load_config")
+    def test_select_targets_returns_limited_list(self, mock_load_config, mock_groq):
         """Test that select_targets returns limited high-value targets."""
-        mock_config = MagicMock()
-        mock_config.api_keys = {"groq": "test-key"}
-        mock_config_class.load.return_value = mock_config
+        mock_load_config.return_value = {"api_keys": {"groq": "test-key"}}
 
         mock_response = MagicMock()
         mock_response.choices = [MagicMock()]
