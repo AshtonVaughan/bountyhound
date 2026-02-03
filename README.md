@@ -253,6 +253,18 @@ bountyhound/
     └── models.py       # Data models
 ```
 
+
+## Related Projects
+
+- **[bountyhound-agent](https://github.com/AshtonVaughan/bountyhound-agent)** - Claude Code plugin for autonomous swarm-based hunting with parallel agents and persistent state
+
+**How they work together:**
+- **bountyhound CLI** (this repo) provides the security reconnaissance and scanning tools
+- **bountyhound-agent** provides the AI orchestration, swarm methodology, and autonomous hunting capabilities
+
+For autonomous multi-agent hunting with session persistence and parallel execution, see bountyhound-agent.
+
+<br>
 <br>
 
 ## 🛡️ Responsible Use
