@@ -59,7 +59,7 @@ def migrate_programs() -> int:
             rd = dict(zip(cols, row))
             handle = rd.get('handle') or rd.get('name', f'unknown_{inserted}')
             try:
-                dst.execute("""
+                cur = dst.execute("""
                     INSERT OR IGNORE INTO programs
                         (handle, name, platform, url, offers_bounties,
                          min_bounty, max_bounty, policy_url)
@@ -70,7 +70,8 @@ def migrate_programs() -> int:
                     rd.get('min_bounty'), rd.get('max_bounty'),
                     rd.get('policy_url', ''),
                 ))
-                inserted += 1
+                if cur.rowcount:
+                    inserted += 1
             except Exception as e:
                 print(f"  Skipped row in {tname}: {e}")
     dst.commit()
@@ -102,7 +103,7 @@ def migrate_cves() -> int:
         for row in rows:
             rd = dict(zip(cols, row))
             try:
-                dst.execute("""
+                cur = dst.execute("""
                     INSERT OR IGNORE INTO cves
                         (cve_id, description, cvss_score, cvss_vector,
                          affected_products_json, published_date)
@@ -115,7 +116,8 @@ def migrate_cves() -> int:
                     rd.get('affected_products') or rd.get('products'),
                     rd.get('published_date') or rd.get('date'),
                 ))
-                inserted += 1
+                if cur.rowcount:
+                    inserted += 1
             except Exception as e:
                 print(f"  Skipped row in {tname}: {e}")
     dst.commit()
