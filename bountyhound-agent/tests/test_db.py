@@ -83,3 +83,38 @@ def test_hunt_session_lifecycle(db):
     assert row['hypotheses_tested'] == 5
     assert row['findings_count'] == 1
     assert row['completed_at'] is not None
+
+def test_upsert_hypothesis_preserves_created_at(db):
+    """INSERT OR REPLACE would reset created_at — ON CONFLICT must not."""
+    db._conn().execute(
+        "INSERT INTO programs (handle, platform) VALUES ('hyp-prog', 'hackerone')"
+    ).connection.commit()
+    pid = db._conn().execute("SELECT id FROM programs WHERE handle='hyp-prog'").fetchone()[0]
+    tid = db.upsert_target(pid, 'hyp.com', {})
+    h = {
+        'id': 'abc123', 'target_id': tid, 'title': 'Test hyp',
+        'attack_surface': '/api/user', 'technique': 'IDOR',
+        'track': 2, 'status': 'pending'
+    }
+    db.upsert_hypothesis(h)
+    created_first = db._conn().execute(
+        "SELECT created_at FROM hypotheses WHERE id='abc123'"
+    ).fetchone()[0]
+    h['title'] = 'Updated title'
+    db.upsert_hypothesis(h)
+    created_second = db._conn().execute(
+        "SELECT created_at FROM hypotheses WHERE id='abc123'"
+    ).fetchone()[0]
+    assert created_first == created_second, "created_at was reset — INSERT OR REPLACE bug"
+
+def test_get_hypothesis_roundtrip(db):
+    db._conn().execute(
+        "INSERT INTO programs (handle, platform) VALUES ('get-hyp-prog', 'hackerone')"
+    ).connection.commit()
+    pid = db._conn().execute("SELECT id FROM programs WHERE handle='get-hyp-prog'").fetchone()[0]
+    tid = db.upsert_target(pid, 'get-hyp.com', {})
+    h = {'id': 'xyz789', 'target_id': tid, 'title': 'Get hyp test', 'track': 1, 'status': 'pending'}
+    db.upsert_hypothesis(h)
+    result = db.get_hypothesis('xyz789')
+    assert result is not None
+    assert result['title'] == 'Get hyp test'

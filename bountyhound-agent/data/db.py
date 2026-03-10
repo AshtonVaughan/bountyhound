@@ -1,6 +1,7 @@
 """BountyHound database interface — read/write access to bountyhound.db."""
 import sqlite3
 import json
+from contextlib import closing
 from pathlib import Path
 from typing import Optional
 
@@ -20,14 +21,14 @@ class BountyHoundDB:
     # --- Programs ---
 
     def get_program(self, handle: str) -> Optional[dict]:
-        with self._conn() as conn:
+        with closing(self._conn()) as conn:
             row = conn.execute(
                 "SELECT * FROM programs WHERE handle = ?", (handle,)
             ).fetchone()
             return dict(row) if row else None
 
     def search_programs(self, query: str) -> list:
-        with self._conn() as conn:
+        with closing(self._conn()) as conn:
             rows = conn.execute(
                 "SELECT * FROM programs WHERE handle LIKE ? OR name LIKE ? LIMIT 20",
                 (f"%{query}%", f"%{query}%")
@@ -38,7 +39,7 @@ class BountyHoundDB:
 
     def get_cves_for_tech(self, product: str) -> list:
         """Find CVEs whose description or affected_products_json mention the product."""
-        with self._conn() as conn:
+        with closing(self._conn()) as conn:
             rows = conn.execute(
                 """SELECT * FROM cves
                    WHERE affected_products_json LIKE ?
@@ -49,7 +50,7 @@ class BountyHoundDB:
             return [dict(r) for r in rows]
 
     def get_cve(self, cve_id: str) -> Optional[dict]:
-        with self._conn() as conn:
+        with closing(self._conn()) as conn:
             row = conn.execute(
                 "SELECT * FROM cves WHERE cve_id = ?", (cve_id,)
             ).fetchone()
@@ -58,7 +59,7 @@ class BountyHoundDB:
     # --- Targets ---
 
     def get_target(self, program_id: int, domain: str) -> Optional[dict]:
-        with self._conn() as conn:
+        with closing(self._conn()) as conn:
             row = conn.execute(
                 "SELECT * FROM targets WHERE program_id = ? AND domain = ?",
                 (program_id, domain)
@@ -67,7 +68,7 @@ class BountyHoundDB:
 
     def upsert_target(self, program_id: int, domain: str, model: dict) -> int:
         """Insert or update a target. Returns the target row id."""
-        with self._conn() as conn:
+        with closing(self._conn()) as conn:
             conn.execute("""
                 INSERT INTO targets (program_id, domain, model_json, last_updated,
                     source_available, auth_tested)
@@ -92,20 +93,33 @@ class BountyHoundDB:
     # --- Hypotheses ---
 
     def get_hypothesis(self, hypothesis_id: str) -> Optional[dict]:
-        with self._conn() as conn:
+        with closing(self._conn()) as conn:
             row = conn.execute(
                 "SELECT * FROM hypotheses WHERE id = ?", (hypothesis_id,)
             ).fetchone()
             return dict(row) if row else None
 
     def upsert_hypothesis(self, h: dict) -> None:
-        with self._conn() as conn:
+        with closing(self._conn()) as conn:
             conn.execute("""
-                INSERT OR REPLACE INTO hypotheses
+                INSERT INTO hypotheses
                     (id, target_id, title, attack_surface, technique, track,
                      novelty_score, exploitability_score, impact_score, effort_score,
                      total_score, status, outcome, tested_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET
+                    title = excluded.title,
+                    attack_surface = excluded.attack_surface,
+                    technique = excluded.technique,
+                    track = excluded.track,
+                    novelty_score = excluded.novelty_score,
+                    exploitability_score = excluded.exploitability_score,
+                    impact_score = excluded.impact_score,
+                    effort_score = excluded.effort_score,
+                    total_score = excluded.total_score,
+                    status = excluded.status,
+                    outcome = excluded.outcome,
+                    tested_at = excluded.tested_at
             """, (
                 h['id'], h['target_id'], h['title'], h.get('attack_surface'),
                 h.get('technique'), h.get('track', 2),
@@ -119,7 +133,7 @@ class BountyHoundDB:
     # --- Findings ---
 
     def insert_finding(self, f: dict) -> int:
-        with self._conn() as conn:
+        with closing(self._conn()) as conn:
             cursor = conn.execute("""
                 INSERT INTO findings
                     (hypothesis_id, target_id, title, severity, cvss_score,
@@ -135,7 +149,7 @@ class BountyHoundDB:
 
     def insert_evidence(self, finding_id: int, evidence_type: str,
                         file_path: str, description: str = '') -> None:
-        with self._conn() as conn:
+        with closing(self._conn()) as conn:
             conn.execute("""
                 INSERT INTO evidence (finding_id, evidence_type, file_path, description)
                 VALUES (?, ?, ?, ?)
@@ -145,7 +159,7 @@ class BountyHoundDB:
     # --- Hunt Sessions ---
 
     def start_hunt_session(self, target_id: int) -> int:
-        with self._conn() as conn:
+        with closing(self._conn()) as conn:
             cursor = conn.execute(
                 "INSERT INTO hunt_sessions (target_id) VALUES (?)", (target_id,)
             )
@@ -154,7 +168,7 @@ class BountyHoundDB:
 
     def complete_hunt_session(self, session_id: int,
                                hypotheses_tested: int, findings_count: int) -> None:
-        with self._conn() as conn:
+        with closing(self._conn()) as conn:
             conn.execute("""
                 UPDATE hunt_sessions SET
                     completed_at = CURRENT_TIMESTAMP,
