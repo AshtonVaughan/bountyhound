@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS programs (
 
 CREATE TABLE IF NOT EXISTS cves (
     id                      INTEGER PRIMARY KEY AUTOINCREMENT,
-    cve_id                  TEXT    UNIQUE,
+    cve_id                  TEXT    NOT NULL UNIQUE,
     description             TEXT,
     cvss_score              REAL,
     cvss_vector             TEXT,
@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS endpoints (
 );
 
 CREATE TABLE IF NOT EXISTS hypotheses (
+    -- sha256(attack_surface || '|' || technique) — computed by hypothesis-engine, must match for dedup
     id                  TEXT    PRIMARY KEY,
     target_id           INTEGER NOT NULL REFERENCES targets(id),
     title               TEXT    NOT NULL,
@@ -62,7 +63,7 @@ CREATE TABLE IF NOT EXISTS hypotheses (
     impact_score        REAL,
     effort_score        REAL,
     total_score         REAL,
-    status              TEXT    NOT NULL DEFAULT 'pending',
+    status              TEXT    NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','confirmed','failed','discarded')),
     outcome             TEXT,
     tested_at           TIMESTAMP,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -73,10 +74,10 @@ CREATE TABLE IF NOT EXISTS findings (
     hypothesis_id   TEXT    REFERENCES hypotheses(id),
     target_id       INTEGER NOT NULL REFERENCES targets(id),
     title           TEXT    NOT NULL,
-    severity        TEXT,
+    severity    TEXT CHECK(severity IN ('critical','high','medium','low','informational')),
     cvss_score      REAL,
     cvss_vector     TEXT,
-    status          TEXT    NOT NULL DEFAULT 'draft',
+    status          TEXT    NOT NULL DEFAULT 'draft' CHECK(status IN ('draft','submitted','confirmed','informational','duplicate','out_of_scope')),
     report_path     TEXT,
     payout          REAL,
     submitted_at    TIMESTAMP,
@@ -97,12 +98,13 @@ CREATE TABLE IF NOT EXISTS hunt_sessions (
     target_id           INTEGER NOT NULL REFERENCES targets(id),
     started_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     completed_at        TIMESTAMP,
+    -- denormalized counters maintained by db.py — not enforced by SQLite
     hypotheses_tested   INTEGER NOT NULL DEFAULT 0,
     findings_count      INTEGER NOT NULL DEFAULT 0,
     notes               TEXT
 );
 
-CREATE INDEX IF NOT EXISTS idx_cves_products ON cves(affected_products_json);
+CREATE INDEX IF NOT EXISTS idx_cves_description ON cves(description);
 CREATE INDEX IF NOT EXISTS idx_hypotheses_target ON hypotheses(target_id, status);
 CREATE INDEX IF NOT EXISTS idx_findings_target ON findings(target_id, status);
 CREATE INDEX IF NOT EXISTS idx_evidence_finding ON evidence(finding_id);

@@ -41,3 +41,11 @@ def test_targets_unique_program_domain():
     conn.execute("INSERT INTO targets (program_id, domain) VALUES (?, 'example.com')", (pid,))
     with pytest.raises(sqlite3.IntegrityError):
         conn.execute("INSERT INTO targets (program_id, domain) VALUES (?, 'example.com')", (pid,))
+
+def test_foreign_key_enforcement():
+    conn = sqlite3.connect(":memory:")
+    conn.execute("PRAGMA foreign_keys = ON")
+    conn.executescript(SCHEMA_FILE.read_text())
+    with pytest.raises(sqlite3.IntegrityError):
+        conn.execute("INSERT INTO targets (program_id, domain) VALUES (999, 'test.com')")
+        conn.commit()
