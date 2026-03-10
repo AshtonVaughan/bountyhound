@@ -1,0 +1,27 @@
+# Secrets
+.env
+*.env
+credentials/
+
+# Hunt output (potentially sensitive target data)
+findings/
+database/
+*.db
+*.db-shm
+*.db-wal
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Strix
+.strix/
+
+# Temp / editor
+*.tmp
+.DS_Store
+Thumbs.db
+.worktrees/
