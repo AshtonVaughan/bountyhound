@@ -5,9 +5,7 @@ Navigates through pages systematically to collect all programs
 """
 
 import json
-import sys
 import time
-from contextlib import closing
 from datetime import datetime
 from pathlib import Path
 from selenium import webdriver
@@ -15,31 +13,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
-
-def _sync_to_bountyhound_db(program_data: dict) -> None:
-    """Mirror scraped program to bountyhound.db programs table."""
-    sys.path.insert(0, str(Path(__file__).parent / "bountyhound-agent"))
-    from data.db import BountyHoundDB
-    db = BountyHoundDB()
-    handle = program_data.get('handle', '')
-    if not handle:
-        return
-    with closing(db._conn()) as conn:
-        conn.execute("""
-            INSERT OR REPLACE INTO programs
-                (handle, name, platform, url, offers_bounties, min_bounty, max_bounty, policy_url)
-            VALUES (?, ?, 'hackerone', ?, ?, ?, ?, ?)
-        """, (
-            handle,
-            program_data.get('name', ''),
-            program_data.get('url', ''),
-            1 if program_data.get('offers_bounties') else 0,
-            program_data.get('minimum_bounty_table', {}).get('value') if isinstance(program_data.get('minimum_bounty_table'), dict) else program_data.get('min_bounty'),
-            program_data.get('maximum_bounty_table', {}).get('value') if isinstance(program_data.get('maximum_bounty_table'), dict) else program_data.get('max_bounty'),
-            f"https://hackerone.com/{handle}",
-        ))
-        conn.commit()
 
 class H1PaginationScraper:
     def __init__(self):
@@ -90,10 +63,6 @@ class H1PaginationScraper:
                                 "url": f"https://hackerone.com{href}",
                                 "page": page
                             }
-                            try:
-                                _sync_to_bountyhound_db(self.programs[handle])
-                            except Exception as e:
-                                print(f"  Warning: bountyhound.db sync failed: {e}")
                             page_count += 1
 
                 print(f"   Found {page_count} new programs (total: {len(self.programs)})")

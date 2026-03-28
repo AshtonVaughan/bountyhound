@@ -1,0 +1,13 @@
+# SAST (Static Application Security Testing) Requirements
+
+# Core SAST Tools
+semgrep==1.96.0
+
+# Language-specific scanners
+bandit==1.8.0  # Python
+safety==3.2.10  # Python dependencies
+pylint==3.3.2  # Python code quality
+
+# Utilities
+colorama==0.4.6
+gitpython==3.1.43

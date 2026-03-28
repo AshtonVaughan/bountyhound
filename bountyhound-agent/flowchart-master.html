@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BountyHound System Flowchart - Master Architecture</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+        .mermaid {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 20px;
+            border-left: 5px solid #2196f3;
+            margin-bottom: 30px;
+            border-radius: 5px;
+        }
+        .info h3 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        .legend-box {
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+            border-radius: 5px;
+            border: 2px solid #333;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 10px 10px 0;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 BountyHound System Flowchart</h1>
+        <div class="subtitle">Master Architecture - Visual Overview</div>
+
+        <div class="info">
+            <h3>📊 System Overview</h3>
+            <p><strong>Total Components:</strong> 155 agents + 6 skills</p>
+            <p><strong>Hunt Duration:</strong> ~29 minutes (automated)</p>
+            <p><strong>Success Rate:</strong> 40+ vulnerabilities found across 10 major targets</p>
+            <p><strong>Architecture:</strong> Phased hunting with parallel execution</p>
+        </div>
+
+        <h2>Master System Architecture</h2>
+        <div class="mermaid">
+graph TB
+    Start([User Input]) --> CMD{Command Type?}
+
+    CMD -->|/hunt target| Hunt[Phased Hunter Agent]
+    CMD -->|/phunt target| Hunt
+    CMD -->|/recon domain| Recon[Discovery Engine]
+    CMD -->|/creds action| Creds[Auth Manager]
+
+    Hunt --> P1[PHASE 1: RECON<br/>~5 min]
+    P1 --> P2[PHASE 2: DISCOVERY<br/>~2 min]
+    P2 --> P3[PHASE 3: TESTING<br/>~15 min]
+    P3 --> P4[PHASE 4: EXPLOIT<br/>~5 min]
+    P4 --> P5[PHASE 5: REPORT<br/>~3 min]
+
+    P3 --> TrackA[Track A:<br/>CLI Scanning]
+    P3 --> TrackB[Track B:<br/>Browser Testing]
+
+    TrackA --> Nuclei[Nuclei Templates]
+    TrackB --> XSS[XSS Testing]
+    TrackB --> SQLi[SQLi Testing]
+    TrackB --> IDOR[IDOR Testing]
+    TrackB --> Auth[Auth Bypass]
+
+    Nuclei --> Merge[Merge Findings]
+    XSS --> Merge
+    SQLi --> Merge
+    IDOR --> Merge
+    Auth --> Merge
+
+    Merge --> Validate[POC Validator]
+    Validate -->|Verified| Report[Reporter Agent]
+    Validate -->|Failed| Discard[Discard]
+
+    Report --> Output[(Reports &<br/>Evidence)]
+
+    Recon --> DB[(SQLite DB)]
+    DB --> P2
+
+    Creds --> EnvFiles[.env Files]
+    EnvFiles --> TrackB
+
+    style Hunt fill:#f96,stroke:#333,stroke-width:4px
+    style Output fill:#9f6,stroke:#333,stroke-width:4px
+    style Report fill:#ff9,stroke:#333,stroke-width:2px
+    style Validate fill:#f9f,stroke:#333,stroke-width:2px
+    style DB fill:#69f,stroke:#333,stroke-width:2px
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box" style="background:#f96;"></div>
+                <div><strong>Primary Agents</strong><br/>Core orchestration</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background:#9f6;"></div>
+                <div><strong>Output</strong><br/>Final results</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background:#ff9;"></div>
+                <div><strong>Reporting</strong><br/>Report generation</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background:#f9f;"></div>
+                <div><strong>Validation</strong><br/>POC verification</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background:#69f;"></div>
+                <div><strong>Storage</strong><br/>Data persistence</div>
+            </div>
+        </div>
+
+        <h2 style="margin-top: 50px;">Agent Interaction Flow</h2>
+        <div class="mermaid">
+graph LR
+    User([User]) --> Orchestrator[Hunt<br/>Orchestrator]
+
+    Orchestrator --> Discovery[Discovery<br/>Engine]
+    Orchestrator --> Auth[Auth<br/>Manager]
+    Orchestrator --> API[API<br/>Tester]
+    Orchestrator --> Injection[Injection<br/>Tester]
+    Orchestrator --> AuthBoundary[Authorization<br/>Boundary]
+
+    Discovery --> Hypotheses[(Hypothesis<br/>Cards)]
+
+    API --> Evidence[Evidence<br/>Collector]
+    Injection --> Evidence
+    AuthBoundary --> Evidence
+
+    Evidence --> Validator[POC<br/>Validator]
+
+    Validator -->|Verified| Reporter[Reporter<br/>Agent]
+    Validator -->|Failed| Discard[/Discard/]
+
+    Reporter --> Output[(Reports &<br/>Evidence)]
+
+    Auth --> Creds[(.env Files)]
+    Creds --> API
+    Creds --> AuthBoundary
+
+    style Orchestrator fill:#f96,stroke:#333,stroke-width:4px
+    style Reporter fill:#9f6,stroke:#333,stroke-width:4px
+    style Discovery fill:#ff9,stroke:#333,stroke-width:2px
+        </div>
+
+        <h2 style="margin-top: 50px;">Discovery Engine - Hypothesis Generation</h2>
+        <div class="mermaid">
+graph TB
+    Input[(Recon Data)] --> Load[Load from<br/>SQLite]
+
+    Load --> Analysis{Analysis<br/>Type}
+
+    Analysis -->|Pattern| P1[Identify<br/>patterns]
+    Analysis -->|Anomaly| A1[Detect<br/>anomalies]
+    Analysis -->|Tech| T1[Fingerprint<br/>stack]
+
+    P1 --> P2[Common<br/>endpoints]
+    P1 --> P3[URL<br/>structures]
+
+    A1 --> A2[Unusual<br/>headers]
+    A1 --> A3[Error<br/>messages]
+
+    T1 --> T2[Framework<br/>detection]
+    T1 --> T3[Library<br/>versions]
+
+    P2 --> Synthesize[LLM<br/>Synthesis]
+    P3 --> Synthesize
+    A2 --> Synthesize
+    A3 --> Synthesize
+    T2 --> Synthesize
+    T3 --> Synthesize
+
+    Synthesize --> Generate[Generate<br/>Hypotheses]
+
+    Generate --> H1[GraphQL<br/>introspection]
+    Generate --> H2[IDOR on<br/>/api/users/]
+    Generate --> H3[XXE in XML<br/>endpoint]
+    Generate --> H4[JWT secret<br/>brute force]
+    Generate --> H5[5-15 more<br/>vectors]
+
+    H1 --> Test[Browser<br/>Testing]
+    H2 --> Test
+    H3 --> Test
+    H4 --> Test
+    H5 --> Test
+
+    Test --> Results{Results?}
+    Results -->|Found| Evid[(Evidence)]
+    Results -->|None| Gap[Gap<br/>Analysis]
+
+    Gap --> Refine[Refine]
+    Refine --> Generate
+
+    style Input fill:#69f,stroke:#333,stroke-width:2px
+    style Generate fill:#f96,stroke:#333,stroke-width:2px
+    style Evid fill:#9f6,stroke:#333,stroke-width:2px
+        </div>
+
+        <div class="info" style="margin-top: 40px;">
+            <h3>🎯 Key Features</h3>
+            <ul>
+                <li><strong>Parallel Execution:</strong> CLI scanning + Browser testing run simultaneously</li>
+                <li><strong>LLM-Powered Discovery:</strong> AI generates hypothesis cards from recon data</li>
+                <li><strong>Gap-Triggered Re-discovery:</strong> If no findings, refine and retry</li>
+                <li><strong>POC Validation:</strong> Every finding verified with curl before reporting</li>
+                <li><strong>Multi-User Support:</strong> Test IDOR/BOLA with User A/B credentials</li>
+                <li><strong>Evidence Collection:</strong> Screenshots, network logs, request/response captures</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="flowchart-phases.html" class="btn">View Detailed Phase Flow →</a>
+            <a href="flowchart-browser-testing.html" class="btn">View Browser Testing Flow →</a>
+            <a href="flowchart-credentials.html" class="btn">View Credential Management →</a>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; color: #888; font-size: 0.9em;">
+            <p>Generated: 2026-02-11 | BountyHound v5.0 | 155 Components</p>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                curve: 'basis',
+                padding: 20
+            }
+        });
+    </script>
+</body>
+</html>

@@ -53,7 +53,7 @@ The hunt runs six sequential phases via `intelligence-loop.md`:
 - Layer 1: Browser reproduction (must see impact)
 - Layer 2: Curl chain (must reproduce headlessly)
 - Layer 3: Impact analysis + CVSS score
-- Any layer failure → hypothesis silently discarded
+- Confirmed fails are discarded silently; `[NEEDS-PROOF]` and `[WAF-BLOCKED]` findings are surfaced to you
 
 **⑥ Report**
 - H1-ready markdown → `findings/<program>/reports/`

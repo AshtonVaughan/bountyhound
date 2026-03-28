@@ -1,0 +1,40 @@
+{
+  "version": 3,
+  "name": "playtika",
+  "saved_at": 1773150217.778883,
+  "flows": {},
+  "repeater_history": [],
+  "ws_messages": [],
+  "scope": {
+    "enabled": true,
+    "include": [],
+    "exclude": []
+  },
+  "passive_findings": [],
+  "match_replace_rules": [],
+  "session_rules": [],
+  "intruder_jobs": {},
+  "scanner_jobs": {},
+  "crawl_jobs": {},
+  "discovery_jobs": {},
+  "sequencer_jobs": {},
+  "breakpoint_rules": [],
+  "scheduled_scans": [],
+  "collaborator_interactions": [],
+  "collaborator_payloads": {},
+  "collaborator_config": {
+    "domain": "collab.localhost",
+    "dns_port": 5354,
+    "http_port": 9999,
+    "smtp_port": 2525,
+    "enabled": false,
+    "response_ip": "127.0.0.1",
+    "persist_path": "collaborator_data.jsonl"
+  },
+  "scanned_endpoints": {},
+  "resource_pools": {},
+  "tls_client_config": null,
+  "cookie_jar": [],
+  "organizer_items": [],
+  "macro_chains": []
+}

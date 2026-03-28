@@ -1,0 +1,73 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-8.2.2, pluggy-1.6.0 -- C:\Users\vaugh\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\vaugh\BountyHound\bountyhound-agent
+configfile: pytest.ini
+plugins: anyio-4.10.0, dash-2.14.1, ddtrace-2.21.8, asyncio-1.2.0, base-url-2.1.0, cov-6.2.1, playwright-0.7.2
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 64 items
+
+tests/engine/agents/test_hsts_analyzer.py::TestInitialization::test_init_with_basic_url PASSED [  1%]
+tests/engine/agents/test_hsts_analyzer.py::TestInitialization::test_init_with_custom_timeout PASSED [  3%]
+tests/engine/agents/test_hsts_analyzer.py::TestInitialization::test_init_with_custom_timeout ERROR [  3%]
+tests/engine/agents/test_hsts_analyzer.py::TestInitialization::test_init_without_ssl_verification PASSED [  4%]
+tests/engine/agents/test_hsts_analyzer.py::TestInitialization::test_init_without_ssl_verification ERROR [  4%]
+tests/engine/agents/test_hsts_analyzer.py::TestInitialization::test_init_strips_trailing_slash PASSED [  6%]
+tests/engine/agents/test_hsts_analyzer.py::TestInitialization::test_init_strips_trailing_slash ERROR [  6%]
+tests/engine/agents/test_hsts_analyzer.py::TestInitialization::test_init_with_custom_user_agent FAILED [  7%]
+tests/engine/agents/test_hsts_analyzer.py::TestInitialization::test_init_requires_requests_library PASSED [  9%]
+tests/engine/agents/test_hsts_analyzer.py::TestInitialization::test_init_requires_requests_library ERROR [  9%]
+tests/engine/agents/test_hsts_analyzer.py::TestDomainExtraction::test_extract_domain_from_simple_url PASSED [ 10%]
+tests/engine/agents/test_hsts_analyzer.py::TestDomainExtraction::test_extract_domain_from_subdomain PASSED [ 12%]
+tests/engine/agents/test_hsts_analyzer.py::TestDomainExtraction::test_extract_domain_from_url_with_path PASSED [ 14%]
+tests/engine/agents/test_hsts_analyzer.py::TestDomainExtraction::test_extract_domain_from_url_with_port PASSED [ 15%]
+tests/engine/agents/test_hsts_analyzer.py::TestHSTSHeaderParsing::test_parse_missing_hsts_header PASSED [ 17%]
+tests/engine/agents/test_hsts_analyzer.py::TestHSTSHeaderParsing::test_parse_basic_hsts_header PASSED [ 18%]
+tests/engine/agents/test_hsts_analyzer.py::TestHSTSHeaderParsing::test_parse_basic_hsts_header ERROR [ 18%]
+tests/engine/agents/test_hsts_analyzer.py::TestHSTSHeaderParsing::test_parse_full_hsts_header PASSED [ 20%]
+tests/engine/agents/test_hsts_analyzer.py::TestHSTSHeaderParsing::test_parse_hsts_header_case_insensitive PASSED [ 21%]
+tests/engine/agents/test_hsts_analyzer.py::TestHSTSHeaderParsing::test_parse_hsts_header_case_insensitive ERROR [ 21%]
+tests/engine/agents/test_hsts_analyzer.py::TestHSTSHeaderParsing::test_parse_hsts_header_with_spaces PASSED [ 23%]
+tests/engine/agents/test_hsts_analyzer.py::TestHSTSHeaderParsing::test_parse_hsts_header_without_max_age PASSED [ 25%]
+tests/engine/agents/test_hsts_analyzer.py::TestHSTSHeaderParsing::test_parse_hsts_header_with_invalid_max_age PASSED [ 26%]
+tests/engine/agents/test_hsts_analyzer.py::TestHSTSHeaderParsing::test_parse_hsts_header_with_invalid_max_age ERROR [ 26%]
+tests/engine/agents/test_hsts_analyzer.py::TestHSTSHeaderParsing::test_parse_hsts_header_with_zero_max_age PASSED [ 28%][stderr] OpenTelemetry configuration OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE is not supported by Datadog.
+C:\Users\vaugh\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\pytest_asyncio\plugin.py:252: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+
+tests/engine/agents/test_hsts_analyzer.py::TestHSTSHeaderParsing::test_parse_hsts_header_preserves_raw_value PASSED [ 29%]
+tests/engine/agents/test_hsts_analyzer.py::TestMissingHSTSDetection::test_detect_missing_hsts PASSED [ 31%]
+tests/engine/agents/test_hsts_analyzer.py::TestMissingHSTSDetection::test_detect_missing_hsts ERROR [ 31%]
+tests/engine/agents/test_hsts_analyzer.py::TestMissingHSTSDetection::test_missing_hsts_finding_details PASSED [ 32%]
+tests/engine/agents/test_hsts_analyzer.py::TestMaxAgeValidation::test_max_age_too_short_under_6_months FAILED [ 34%]
+tests/engine/agents/test_hsts_analyzer.py::TestMaxAgeValidation::test_max_age_between_6_months_and_1_year FAILED [ 35%]
+tests/engine/agents/test_hsts_analyzer.py::TestMaxAgeValidation::test_max_age_1_year_no_finding PASSED [ 37%]
+tests/engine/agents/test_hsts_analyzer.py::TestMaxAgeValidation::test_max_age_zero PASSED [ 39%]
+tests/engine/agents/test_hsts_analyzer.py::TestMaxAgeValidation::test_max_age_zero ERROR [ 39%]
+tests/engine/agents/test_hsts_analyzer.py::TestMaxAgeValidation::test_max_age_very_large PASSED [ 40%]
+tests/engine/agents/test_hsts_analyzer.py::TestIncludeSubDomainsValidation::test_missing_include_subdomains PASSED [ 42%]
+tests/engine/agents/test_hsts_analyzer.py::TestIncludeSubDomainsValidation::test_include_subdomains_present PASSED [ 43%]
+tests/engine/agents/test_hsts_analyzer.py::TestIncludeSubDomainsValidation::test_include_subdomains_present ERROR [ 43%]
+tests/engine/agents/test_hsts_analyzer.py::TestIncludeSubDomainsValidation::test_include_subdomains_case_variations PASSED [ 45%]
+tests/engine/agents/test_hsts_analyzer.py::TestIncludeSubDomainsValidation::test_include_subdomains_case_variations ERROR [ 45%]
+tests/engine/agents/test_hsts_analyzer.py::TestPreloadValidation::test_missing_preload_on_top_level_domain PASSED [ 46%]
+tests/engine/agents/test_hsts_analyzer.py::TestPreloadValidation::test_missing_preload_on_subdomain_skipped PASSED [ 48%]
+tests/engine/agents/test_hsts_analyzer.py::TestPreloadValidation::test_missing_preload_on_subdomain_skipped ERROR [ 48%]
+tests/engine/agents/test_hsts_analyzer.py::TestPreloadValidation::test_preload_present PASSED [ 50%]
+tests/engine/agents/test_hsts_analyzer.py::TestHTTPRedirect::test_http_no_redirect PASSED [ 51%]
+tests/engine/agents/test_hsts_analyzer.py::TestHTTPRedirect::test_http_redirects_to_https_permanent PASSED [ 53%]
+tests/engine/agents/test_hsts_analyzer.py::TestHTTPRedirect::test_http_redirects_to_https_308 PASSED [ 54%]
+tests/engine/agents/test_hsts_analyzer.py::TestHTTPRedirect::test_http_redirects_to_https_308 ERROR [ 54%]
+tests/engine/agents/test_hsts_analyzer.py::TestHTTPRedirect::test_http_redirects_to_https_temporary PASSED [ 56%]
+tests/engine/agents/test_hsts_analyzer.py::TestHTTPRedirect::test_http_redirects_to_https_temporary ERROR [ 56%]
+tests/engine/agents/test_hsts_analyzer.py::TestHTTPRedirect::test_http_redirects_to_http PASSED [ 57%]
+tests/engine/agents/test_hsts_analyzer.py::TestHTTPRedirect::test_http_redirects_to_http ERROR [ 57%]
+tests/engine/agents/test_hsts_analyzer.py::TestHTTPRedirect::test_http_not_accessible PASSED [ 59%]
+tests/engine/agents/test_hsts_analyzer.py::TestHTTPRedirect::test_http_not_accessible ERROR [ 59%]
+tests/engine/agents/test_hsts_analyzer.py::TestHSTSOnHTTP::test_hsts_header_on_http FAILED [ 60%]
+tests/engine/agents/test_hsts_analyzer.py::TestHSTSOnHTTP::test_no_hsts_header_on_http PASSED [ 62%]
+tests/engine/agents/test_hsts_analyzer.py::TestHSTSOnHTTP::test_no_hsts_header_on_http ERROR [ 62%]
+tests/engine/agents/test_hsts_analyzer.py::TestInvalidSyntax::test_invalid_hsts_syntax PASSED [ 64%]
+tests/engine/agents/test_hsts_analyzer.py::TestRunAllTests::test_run_all_tests_on_https_only PASSED [ 65%]

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "bounty-hound": {
+      "command": "python",
+      "args": [
+        "C:\\Users\\vaugh\\Desktop\\BountyHound\\mcp-unified-server\\main.py"
+      ]
+    }
+  }
+}
+

@@ -1,0 +1,44 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install linting tools
+      run: |
+        pip install flake8 black isort mypy
+
+    - name: Check code formatting with Black
+      run: |
+        black --check engine/ tests/ || echo "Black formatting issues found"
+
+    - name: Check import sorting with isort
+      run: |
+        isort --check-only engine/ tests/ || echo "Import sorting issues found"
+
+    - name: Lint with flake8
+      run: |
+        flake8 engine/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 engine/ tests/ --count --exit-zero --max-complexity=15 --max-line-length=120 --statistics
+
+    - name: Type check with mypy
+      continue-on-error: true
+      run: |
+        mypy engine/ || echo "Type checking issues found"

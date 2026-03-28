@@ -1,0 +1,151 @@
+{
+  "scraped_at": "2026-03-09T22:03:13.315466",
+  "total_found": 24,
+  "discovery_method": "Pagination with offset parameter",
+  "programs": [
+    {
+      "handle": "https://hackerone.com/anduril_industries",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/anduril_industries?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/audible",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/audible?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/banco_plata",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/banco_plata?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/braze_inc",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/braze_inc?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/clear",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/clear?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/doordash",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/doordash?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/dyson",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/dyson?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/flipkart",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/flipkart?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/hubspot",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/hubspot?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/kong",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/kong?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/meesho_bbp",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/meesho_bbp?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/mpesa",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/mpesa?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/neon_bbp",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/neon_bbp?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/netscaler_public_program",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/netscaler_public_program?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/notion",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/notion?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/ripio",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/ripio?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/robinhood",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/robinhood?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/stripchat",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/stripchat?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/syfe_bbp",
+      "name": "Claim your spot",
+      "url": "https://hackerone.comhttps://hackerone.com/syfe_bbp?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/twilio",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/twilio?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/unico_idtech",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/unico_idtech?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/vercel-open-source",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/vercel-open-source?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/wallet_on_telegram",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/wallet_on_telegram?type=team",
+      "page": 0
+    },
+    {
+      "handle": "https://hackerone.com/zooplus",
+      "name": "See details",
+      "url": "https://hackerone.comhttps://hackerone.com/zooplus?type=team",
+      "page": 0
+    }
+  ]
+}

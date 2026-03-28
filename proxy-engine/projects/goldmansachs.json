@@ -1,0 +1,137 @@
+{
+  "version": 3,
+  "name": "goldmansachs",
+  "saved_at": 1773183566.8823626,
+  "flows": {},
+  "repeater_history": [],
+  "ws_messages": [],
+  "scope": {
+    "enabled": true,
+    "include": [
+      {
+        "pattern": ".*\\.playtika.com",
+        "target": "host",
+        "enabled": true,
+        "protocol": "",
+        "port": null,
+        "path_pattern": ""
+      },
+      {
+        "pattern": ".*\\.slotomania.com",
+        "target": "host",
+        "enabled": true,
+        "protocol": "",
+        "port": null,
+        "path_pattern": ""
+      },
+      {
+        "pattern": ".*\\.bingoblitz.com",
+        "target": "host",
+        "enabled": true,
+        "protocol": "",
+        "port": null,
+        "path_pattern": ""
+      },
+      {
+        "pattern": ".*\\.playticorp.com",
+        "target": "host",
+        "enabled": true,
+        "protocol": "",
+        "port": null,
+        "path_pattern": ""
+      },
+      {
+        "pattern": ".*\\.playwsop.com",
+        "target": "host",
+        "enabled": true,
+        "protocol": "",
+        "port": null,
+        "path_pattern": ""
+      },
+      {
+        "pattern": ".*\\.wooga.com",
+        "target": "host",
+        "enabled": true,
+        "protocol": "",
+        "port": null,
+        "path_pattern": ""
+      },
+      {
+        "pattern": ".*\\.houseoffun.com",
+        "target": "host",
+        "enabled": true,
+        "protocol": "",
+        "port": null,
+        "path_pattern": ""
+      },
+      {
+        "pattern": ".*\\.caesarsgames.com",
+        "target": "host",
+        "enabled": true,
+        "protocol": "",
+        "port": null,
+        "path_pattern": ""
+      },
+      {
+        "pattern": ".*\\.seriously.com",
+        "target": "host",
+        "enabled": true,
+        "protocol": "",
+        "port": null,
+        "path_pattern": ""
+      },
+      {
+        "pattern": ".*\\.boardkingsgame.com",
+        "target": "host",
+        "enabled": true,
+        "protocol": "",
+        "port": null,
+        "path_pattern": ""
+      },
+      {
+        "pattern": ".*\\.redecor.com",
+        "target": "host",
+        "enabled": true,
+        "protocol": "",
+        "port": null,
+        "path_pattern": ""
+      },
+      {
+        "pattern": ".*\\.monopoly-poker.com",
+        "target": "host",
+        "enabled": true,
+        "protocol": "",
+        "port": null,
+        "path_pattern": ""
+      }
+    ],
+    "exclude": []
+  },
+  "passive_findings": [],
+  "match_replace_rules": [],
+  "session_rules": [],
+  "intruder_jobs": {},
+  "scanner_jobs": {},
+  "crawl_jobs": {},
+  "discovery_jobs": {},
+  "sequencer_jobs": {},
+  "breakpoint_rules": [],
+  "scheduled_scans": [],
+  "collaborator_interactions": [],
+  "collaborator_payloads": {},
+  "collaborator_config": {
+    "domain": "collab.localhost",
+    "dns_port": 5354,
+    "http_port": 9999,
+    "smtp_port": 2525,
+    "enabled": false,
+    "response_ip": "127.0.0.1",
+    "persist_path": "collaborator_data.jsonl"
+  },
+  "scanned_endpoints": {},
+  "resource_pools": {},
+  "tls_client_config": null,
+  "cookie_jar": [],
+  "organizer_items": [],
+  "macro_chains": []
+}

@@ -1,0 +1,30 @@
+# MANIFEST.in - Include additional files in distribution
+
+# Documentation
+include README.md
+include LICENSE
+include CLAUDE.md
+include CHANGELOG.md
+
+# Requirements
+include requirements.txt
+include requirements-dev.txt
+
+# Configuration
+include pytest.ini
+include .coveragerc
+
+# Payloads and data files
+recursive-include engine/payloads *.txt *.json
+recursive-include skills *.md
+recursive-include agents *.md
+
+# Exclude development files
+global-exclude __pycache__
+global-exclude *.py[co]
+global-exclude .DS_Store
+global-exclude .git*
+exclude .gitignore
+exclude .github/*
+exclude tests/*
+exclude docs/*

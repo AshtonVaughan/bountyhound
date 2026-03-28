@@ -1,0 +1,788 @@
+2026-03-09T11:15:00Z | DISCOVERY PHASE STARTED
+2026-03-09T11:15:15Z | Browser automation initialized
+2026-03-09T11:15:30Z | Navigated to BBP discovery page
+2026-03-09T11:16:00Z | Initial extraction: 24 programs loaded
+2026-03-09T11:16:30Z | Intensive scroll phase initiated (200 scroll iterations)
+2026-03-09T11:18:00Z | Scroll phase completed: still 24 programs
+2026-03-09T11:18:30Z | DISCOVERY PHASE COMPLETE
+2026-03-09T11:18:45Z | Programs index saved: 24 BBPs
+2026-03-09T11:19:00Z | Note: HackerOne shows 236 total BBPs; infinite scroll limitation encountered
+2026-03-09T11:19:15Z | READY FOR PHASE 2: Detailed program scraping
+2026-03-09T21:56:07.892247 | INFO | Starting HackerOne complete discovery...
+2026-03-09T21:56:13.087508 | INFO | Starting Selenium-based discovery...
+2026-03-09T21:56:22.744746 | INFO | Page loaded, starting discovery...
+2026-03-09T21:56:23.448129 | INFO | Scroll 0: 24 programs found (no-change: 0)
+2026-03-09T21:56:31.522548 | INFO | Scroll 10: 24 programs found (no-change: 10)
+2026-03-09T21:56:31.929916 | INFO | Discovery complete: 24 programs found after 11 scrolls
+2026-03-09T21:56:34.141729 | INFO | Saved index: 24 programs
+2026-03-09T21:56:34.142731 | INFO | Summary: 24 programs (24/236 (10.2%))
+2026-03-09T22:03:56.772592 | FAIL | anduril_industries | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:04:01.224502 | FAIL | audible | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:04:05.613468 | FAIL | banco_plata | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:04:09.938173 | FAIL | braze_inc | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:04:14.337168 | FAIL | clear | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:04:18.668639 | FAIL | doordash | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:04:22.984711 | FAIL | dyson | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:04:27.249608 | FAIL | flipkart | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:04:31.537718 | FAIL | hubspot | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:04:35.908193 | FAIL | kong | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:04:40.147028 | FAIL | meesho_bbp | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:04:44.288574 | FAIL | mpesa | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:04:48.662978 | FAIL | neon_bbp | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:04:52.816539 | FAIL | netscaler_public_program | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:04:57.015963 | FAIL | notion | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:05:01.154021 | FAIL | ripio | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:05:05.260862 | FAIL | robinhood | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:05:09.379657 | FAIL | stripchat | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:05:13.546414 | FAIL | syfe_bbp | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:05:17.721211 | FAIL | twilio | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:05:21.799979 | FAIL | unico_idtech | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:05:25.923362 | FAIL | vercel-open-source | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:05:29.999851 | FAIL | wallet_on_telegram | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:05:34.189010 | FAIL | zooplus | Message: unknown error: net::ERR_NAME_NOT_RESOLVED
+  (Session info: chrome=145.0.7632.160)
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff6be18aa55
+	0x7ff6bdee8630
+	0x7ff6bdc7d75d
+	0x7ff6bdc7a294
+	0x7ff6bdc6a6a1
+	0x7ff6bdc6c58f
+	0x7ff6bdc6ac41
+	0x7ff6bdc6a40b
+	0x7ff6bdc6a0c1
+	0x7ff6bdc67d0b
+	0x7ff6bdc68452
+	0x7ff6bdc81a06
+	0x7ff6bdd26734
+	0x7ff6bdd019da
+	0x7ff6bdd2591c
+	0x7ff6bdcc9098
+	0x7ff6bdcc9f83
+	0x7ff6be1b7810
+	0x7ff6be1b1afd
+	0x7ff6be1d2c1a
+	0x7ff6bdf03345
+	0x7ff6bdf0b81c
+	0x7ff6bdef1924
+	0x7ff6bdef1ad6
+	0x7ff6bded7e47
+	0x7ff84332e8d7
+	0x7ff843a4c48c
+
+2026-03-09T22:05:36.811757 | 
+Summary: 24 programs

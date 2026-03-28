@@ -1,0 +1,18 @@
+# Hardware/IoT Security Testing Dependencies
+# Install with: pip install -r requirements-hardware.txt
+
+# Serial communication
+pyserial>=3.5
+
+# USB device interaction
+pyusb>=1.2.1
+
+# Bluetooth LE
+bleak>=0.21.0
+
+# Network packet crafting
+scapy>=2.5.0
+
+# Firmware analysis (optional - requires external tools)
+# binwalk - install separately: pip install binwalk
+# Note: binwalk requires external dependencies (see docs/OPTIONAL-TOOLS.md)

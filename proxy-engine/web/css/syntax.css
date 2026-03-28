@@ -1,0 +1,42 @@
+/* Syntax highlighting for HTTP, JSON, HTML */
+
+.syntax-hl { font-family: var(--font-mono); font-size: var(--font-sm); line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
+
+/* HTTP */
+.sh-method { color: var(--accent); font-weight: 700; }
+.sh-url { color: var(--green); }
+.sh-version { color: var(--text-dim); }
+.sh-status { font-weight: 700; }
+.sh-status-2xx { color: var(--status-2xx); }
+.sh-status-3xx { color: var(--status-3xx); }
+.sh-status-4xx { color: var(--status-4xx); }
+.sh-status-5xx { color: var(--status-5xx); }
+.sh-header-name { color: var(--cyan); }
+.sh-header-value { color: var(--text); }
+.sh-header-sep { color: var(--text-dim); }
+
+/* JSON */
+.sh-key { color: var(--cyan); }
+.sh-string { color: var(--green); }
+.sh-number { color: var(--orange); }
+.sh-boolean { color: var(--purple); }
+.sh-null { color: var(--text-dim); font-style: italic; }
+.sh-brace { color: var(--text-dim); }
+.sh-bracket { color: var(--text-dim); }
+.sh-colon { color: var(--text-dim); }
+.sh-comma { color: var(--text-dim); }
+
+/* HTML/XML */
+.sh-tag { color: var(--red); }
+.sh-attr-name { color: var(--orange); }
+.sh-attr-value { color: var(--green); }
+.sh-comment { color: var(--text-muted); font-style: italic; }
+.sh-entity { color: var(--purple); }
+.sh-doctype { color: var(--text-dim); }
+
+/* Generic */
+.sh-keyword { color: var(--purple); font-weight: 600; }
+.sh-param { color: var(--orange); }
+.sh-value { color: var(--green); }
+.sh-error { color: var(--red); text-decoration: wavy underline; }
+.sh-highlight { background: rgba(227, 179, 65, 0.2); border-radius: 2px; padding: 0 2px; }

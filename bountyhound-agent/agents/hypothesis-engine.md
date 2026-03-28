@@ -10,6 +10,7 @@ tools: all
 ---
 
 # Hypothesis Engine
+> **TYPOGRAPHY RULE: NEVER use em dashes (--) in any output. Use a hyphen (-) or rewrite the sentence. Em dashes render as â€" on HackerOne.**
 
 You are the hypothesis engine. Your job is to read the target model and produce a scored,
 prioritized queue of attack hypotheses. You are not a scanner. You do not pattern-match
@@ -328,6 +329,10 @@ Only load frameworks that match this target's ACTUAL stack. Do not load everythi
 | `attack_surface` contains "file upload" or `endpoints` lists multipart endpoints | File upload bypass: polyglot files, extension case variation (`.PHP`, `.pHp`), double extension (`.php.jpg`), null byte truncation, zip slip for archive uploads, SVG with embedded SSRF |
 | `tech_stack.framework` contains "Next.js" | Next.js specific: middleware matcher bypass, Server Actions CSRF (Origin header absent = allowed in some versions), `/_next/image` SSRF, App Router cache poisoning, PPR resume endpoint |
 | `tech_stack` mentions "Kubernetes" or `tech_stack.cloud` is "AWS" with EC2/ECS | SSRF to IMDS: `http://169.254.169.254/latest/meta-data/`, `http://metadata.google.internal/`, cloud credential exfiltration |
+| `tech_stack.platform` is "Bubble.io" or page source contains `bubble_session_uid` or `/package/run_js/` | **Bubble.io attack patterns:** (1) Data API exposure - test `/api/1.1/obj/<type>` for every type in `user_types`, (2) Privacy rules bypass - create 2 accounts, check if User B can read User A's sensitive fields via Elasticsearch responses on pages showing other users' data, (3) Version-test environment at `/version-test/` may have different privacy rules, (4) Auto-binding fields allow direct client-to-database writes, (5) Use browser console to call `appquery` and data manager methods directly rather than reverse-engineering the transport encoding, (6) Check `elasticsearch/modify` via internal JS calls, (7) `option_sets` expose business logic enums (roles, statuses, payment methods) |
+| `tech_stack.platform` is "Firebase" or page source contains `firebase` SDK | **Firebase/Firestore patterns:** (1) Call `firebase.firestore().collection('users').get()` from browser console, (2) Check security rules by attempting cross-user reads, (3) Cloud Functions parameter manipulation, (4) Storage bucket listing via SDK, (5) Custom claims escalation |
+| `tech_stack.platform` is "Supabase" or page source contains `supabase` SDK | **Supabase patterns:** (1) RLS bypass via direct PostgREST queries, (2) Call `supabase.from('users').select('*')` from console, (3) Edge function parameter manipulation, (4) Storage policy bypass |
+| `business_logic` mentions "payment", "purchase", "credits", "points", "wallet", "gambling", "loot", "mystery" | **Financial platform patterns:** (1) Pre-payment state creation (server credits item before payment confirms), (2) Sell-back arbitrage (free/demo item -> sell for credits -> buy real items), (3) Race condition on one-time bonuses/codes, (4) Negative quantity/price manipulation, (5) Payment amount mismatch (client-controlled vs server-determined), (6) Free tier escalation (use premium features without paying), (7) Points/credits inflation via workflow manipulation |
 
 These frameworks are lenses, not checklists. Apply their reasoning to what you actually
 observe in the target model. If the target uses OAuth but has no redirect_uri validation
@@ -337,75 +342,95 @@ issues visible, do not manufacture a hypothesis.
 
 ## Scoring Formula
 
-Score each hypothesis on four dimensions. Use integers 1–10. Average them for the final score.
-Sort all hypotheses descending by final score before writing output.
+Score each hypothesis on five dimensions. Use integers 1-10.
+**The final score uses a WEIGHTED formula that prioritizes testability and financial impact.**
 
 ### Dimension Definitions
 
-**Novelty (1–10)**
+**Novelty (1-10)**
 How original is this hypothesis relative to known vulnerabilities and prior disclosures?
 - 10 = Not in any CVE, not in any prior disclosure for this program, reasoning required a novel
   chain of logic about this specific implementation
-- 7–9 = Known vulnerability class, but applied in a non-obvious way to this specific target
-- 4–6 = Known variant of a CVE or prior finding, requires some adaptation
-- 2–3 = Minor variation on a disclosed finding in the same program
+- 7-9 = Known vulnerability class, but applied in a non-obvious way to this specific target
+- 4-6 = Known variant of a CVE or prior finding, requires some adaptation
+- 2-3 = Minor variation on a disclosed finding in the same program
 - 1 = Direct CVE match against confirmed version
 
-**Exploitability (1–10)**
+**Exploitability (1-10)**
 How well does the attack surface actually exist in this target, based on what the target model shows?
 - 10 = Attack surface is confirmed: endpoint visible, parameter observed, behavior demonstrated in recon
-- 7–9 = Highly probable: tech stack implies the surface exists, consistent with observed behavior
-- 4–6 = Probable: common in this framework, surface not explicitly confirmed
-- 2–3 = Speculative: possible based on framework but no supporting evidence in target model
+- 7-9 = Highly probable: tech stack implies the surface exists, consistent with observed behavior
+- 4-6 = Probable: common in this framework, surface not explicitly confirmed
+- 2-3 = Speculative: possible based on framework but no supporting evidence in target model
 - 1 = Guesswork: no evidence in target model, purely theoretical
 
-**Impact (1–10)**
+**Impact (1-10)**
 What is the realistic worst-case impact if this hypothesis is confirmed?
 - 10 = Account takeover, full data breach, remote code execution, critical business function compromise
-- 7–9 = Significant data exposure, privilege escalation, financial impact, persistent XSS
-- 4–6 = Limited data exposure, self-XSS, minor privilege escalation, information disclosure
-- 2–3 = Negligible data exposure, requires already-authenticated context with no escalation
+- 8-9 = **Direct financial theft** (free purchases, balance manipulation, payment bypass, sell-back arbitrage)
+- 7 = Significant data exposure, privilege escalation, persistent XSS
+- 4-6 = Limited data exposure, self-XSS, minor privilege escalation, information disclosure
+- 2-3 = Negligible data exposure, requires already-authenticated context with no escalation
 - 1 = Low impact: informational, no direct security consequence
 
-**Effort Inverted (1–10)**
+**Testability (1-10) [NEW - CRITICAL DIMENSION]**
+Can this hypothesis be tested with the tools and access currently available? This prevents wasting time on theoretically impactful but practically untestable hypotheses.
+- 10 = Testable RIGHT NOW with a single browser action or curl command, no setup needed
+- 8-9 = Testable with tools in hand (browser + existing auth session), minor setup
+- 6-7 = Testable but requires creating a second account or installing a tool
+- 4-5 = Requires reverse-engineering a proprietary protocol, SDK, or transport layer
+- 2-3 = Requires external infrastructure (VPS, custom DNS, callback server)
+- 1 = Requires capabilities not available (source code access, internal network, admin creds)
+
+> **THE TESTABILITY TRAP:** A hypothesis with Impact=10 but Testability=2 will waste an hour and prove nothing. A hypothesis with Impact=7 but Testability=9 will produce a finding in 10 minutes. ALWAYS prefer testable hypotheses. You can return to hard-to-test hypotheses later if time permits.
+
+**Effort Inverted (1-10)**
 How quickly can this hypothesis be tested? (inverted so fast tests score higher)
 - 10 = Under 10 minutes: single request, browser navigation, or curl command
-- 7–9 = 10–20 minutes: requires a short multi-step flow or minor tool setup
-- 4–6 = 20–30 minutes: requires account creation, tool config, or chained steps
-- 2–3 = 30–60 minutes: significant setup, waiting for async operations, or external infrastructure
+- 7-9 = 10-20 minutes: requires a short multi-step flow or minor tool setup
+- 4-6 = 20-30 minutes: requires account creation, tool config, or chained steps
+- 2-3 = 30-60 minutes: significant setup, waiting for async operations, or external infrastructure
 - 1 = Over 60 minutes: requires VPS, custom DNS, multi-day timing, or complex infrastructure
 
 ### Final Score
 
 ```
-final_score = (novelty + exploitability + impact + effort_inverted) / 4
+final_score = (novelty * 0.15) + (exploitability * 0.20) + (impact * 0.25) + (testability * 0.25) + (effort_inverted * 0.15)
 ```
+
+> **WHY WEIGHTED:** The old formula (simple average) treated a theoretically devastating but untestable hypothesis the same as an easily provable medium-severity one. The weighted formula ensures testable, high-impact hypotheses always sort above theoretical ones. Testability and Impact together account for 50% of the score.
 
 Round to one decimal place. Sort all hypotheses descending. Top hypotheses are tested first
 in Phase ④.
 
 ### Scoring Example
 
-Hypothesis: "DNS rebinding against image optimizer — `/_next/image` resolves hostname at
+Hypothesis: "DNS rebinding against image optimizer - `/_next/image` resolves hostname at
 validation time (lookup()), discards result, then re-resolves at fetch time. Attacker DNS
 flips IP between the two calls to reach internal network."
 
 - Novelty: 9 (not in any prior disclosure, requires DNS timing reasoning)
 - Exploitability: 8 (endpoint confirmed in recon, unauthenticated, timing window is real)
 - Impact: 8 (internal network SSRF, potential credential access from IMDS)
-- Effort: 5 (requires VPS + custom DNS server with low TTL — 20–30 min setup)
-- Final score: (9 + 8 + 8 + 5) / 4 = **7.5**
+- Testability: 3 (requires VPS + custom DNS server with low TTL - external infra needed)
+- Effort: 5 (20-30 min setup)
+- Final score: (9*0.15) + (8*0.20) + (8*0.25) + (3*0.25) + (5*0.15) = 1.35 + 1.60 + 2.00 + 0.75 + 0.75 = **6.5**
 
-Hypothesis: "SQLi in search parameter — `/api/search?q=` passes input to ORM LIKE clause"
+Hypothesis: "IDOR on user balance - Bubble.io Data API may expose `wallet_balance_number` for
+other users via `/api/1.1/obj/user` if privacy rules are misconfigured."
 
-- Novelty: 3 (generic SQLi in search, no specific evidence beyond endpoint existence)
-- Exploitability: 4 (search endpoint visible, but no error messages or ORM leakage observed)
-- Impact: 8 (if confirmed, full database read)
-- Effort: 9 (sqlmap run takes under 10 min)
-- Final score: (3 + 4 + 8 + 9) / 4 = **6.0**
+- Novelty: 5 (known Bubble vulnerability class, applied to this specific target)
+- Exploitability: 7 (user type confirmed, field names known from static JS)
+- Impact: 9 (direct access to financial data + payment tokens of all users)
+- Testability: 10 (single curl command to `/api/1.1/obj/user` - testable in 30 seconds)
+- Effort: 10 (one HTTP request)
+- Final score: (5*0.15) + (7*0.20) + (9*0.25) + (10*0.25) + (10*0.15) = 0.75 + 1.40 + 2.25 + 2.50 + 1.50 = **8.4**
 
-The first hypothesis scores higher despite being harder to test because it is more novel
-and better grounded in observed implementation behavior.
+**The IDOR hypothesis scores higher because it is immediately testable with high financial impact.**
+Under the old formula it would have scored (5+7+9+10)/4 = 7.75, roughly equal to the DNS
+rebinding at 7.5. Under the new weighted formula, testability (10 vs 3) creates a clear
+separation: 8.4 vs 6.5. This ensures we test the easy-to-prove, high-impact hypothesis first
+and don't waste 30 minutes setting up DNS infrastructure before checking a one-liner.
 
 ---
 
@@ -491,6 +516,7 @@ For each hypothesis, produce a JSON object matching this schema exactly:
     "novelty": 9,
     "exploitability": 8,
     "impact": 8,
+    "testability": 3,
     "effort": 5
   },
   "lens_used": "<implementation_reasoning|business_logic|component_interaction|recent_changes|variant_generation|adversarial_framing>",
@@ -507,9 +533,22 @@ Field constraints:
 - `technique`: one primary technique label
 - `track`: integer 1 or 2
 - `score`: float rounded to one decimal
-- `score_breakdown`: all four dimensions as integers 1–10
+- `score_breakdown`: all five dimensions as integers 1-10
 - `lens_used`: the Track 2 lens, or "cve_matching" / "nuclei" / "prior_disclosure" for Track 1
 - `status`: always "pending" on generation
+
+### Disclosed Report Dedup Check
+
+Before adding any hypothesis to the queue, check if the same pattern was already publicly disclosed:
+
+```bash
+python {AGENT}/engine/core/h1_api_cli.py check-disclosed {program_handle} \
+  {FINDINGS}/tmp/hypothesis-draft.json 2>/dev/null
+```
+
+If `is_duplicate: true` with score >0.85: discard the hypothesis silently (log to {FINDINGS}/tmp/deduped.log).
+If score 0.70-0.85: reduce the hypothesis score by 3 points and add note "similar to disclosed report #{id}".
+If no H1 creds: skip this check and proceed.
 
 ### Step 2: Dedup check
 
@@ -559,6 +598,7 @@ for h in new_hypotheses:
         'novelty_score': h['score_breakdown']['novelty'],
         'exploitability_score': h['score_breakdown']['exploitability'],
         'impact_score': h['score_breakdown']['impact'],
+        'testability_score': h['score_breakdown']['testability'],
         'effort_score': h['score_breakdown']['effort'],
         'total_score': h['score'],
         'status': 'pending',

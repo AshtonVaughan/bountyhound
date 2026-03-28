@@ -1,0 +1,15 @@
+{
+  "name": "bountyhound-agent",
+  "description": "Smart bug bounty hunting with 155 agents across 11 profiles. v6.2.0: Full exploit chain reasoning engine with 26-capability enables map, graph traversal toward 10 critical impact nodes, 3+-step chain validation protocol, severity uplift calculation, and cross-hunt chain query. Also: planning constraints gate, dependency modeling, fresh-start protocol, confidence calibration, anti-sycophancy, pre-report verification scan, anti-compaction memory protocol. Default: 43 agents (core+web+api).",
+  "version": "6.2.0",
+  "author": {
+    "name": "vaughn"
+  },
+  "license": "MIT",
+  "keywords": [
+    "bug-bounty",
+    "security",
+    "pentesting",
+    "automation"
+  ]
+}

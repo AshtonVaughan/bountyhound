@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProxyEngine</title>
+<link rel="stylesheet" href="/web/css/theme.css">
+<link rel="stylesheet" href="/web/css/layout.css">
+<link rel="stylesheet" href="/web/css/components.css">
+<link rel="stylesheet" href="/web/css/syntax.css">
+</head>
+<body>
+<div id="app">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      ProxyEngine
+    </div>
+    <div class="status">
+      <span><span class="dot" id="status-dot"></span><span id="status-text">Connecting...</span></span>
+      <span id="flow-count">0 flows</span>
+      <span id="collab-count" style="display:none"></span>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light theme">
+      <span class="theme-icon" id="theme-icon">&#9790;</span>
+      <span id="theme-label">Light</span>
+    </button>
+    <span class="shortcuts-hint" onclick="PE.keyboard.toggleHelp()" data-tooltip="Keyboard shortcuts">?</span>
+  </div>
+
+  <!-- Tab bar -->
+  <div class="tabbar"></div>
+
+  <!-- Main content panels -->
+  <div class="main-content"></div>
+</div>
+
+<!-- Core scripts -->
+<script src="/web/js/core.js"></script>
+<script src="/web/js/utils.js"></script>
+
+<!-- Components -->
+<script src="/web/js/components/virtual-table.js"></script>
+<script src="/web/js/components/split-pane.js"></script>
+<script src="/web/js/components/syntax-hl.js"></script>
+<script src="/web/js/components/hex-viewer.js"></script>
+<script src="/web/js/components/context-menu.js"></script>
+<script src="/web/js/components/modal.js"></script>
+<script src="/web/js/components/toast.js"></script>
+<script src="/web/js/components/chart.js"></script>
+<script src="/web/js/components/search-bar.js"></script>
+<script src="/web/js/components/keyboard.js"></script>
+<script src="/web/js/components/tab-manager.js"></script>
+<script src="/web/js/components/tree-view.js"></script>
+
+<!-- Panels -->
+<script src="/web/js/panels/dashboard.js"></script>
+<script src="/web/js/panels/proxy.js"></script>
+<script src="/web/js/panels/repeater.js"></script>
+<script src="/web/js/panels/intruder.js"></script>
+<script src="/web/js/panels/scanner.js"></script>
+<script src="/web/js/panels/passive.js"></script>
+<script src="/web/js/panels/sequencer.js"></script>
+<script src="/web/js/panels/comparer.js"></script>
+<script src="/web/js/panels/decoder.js"></script>
+<script src="/web/js/panels/collaborator.js"></script>
+<script src="/web/js/panels/websocket.js"></script>
+<script src="/web/js/panels/scope.js"></script>
+<script src="/web/js/panels/matchreplace.js"></script>
+<script src="/web/js/panels/sessions.js"></script>
+<script src="/web/js/panels/settings.js"></script>
+<script src="/web/js/panels/sitemap.js"></script>
+<script src="/web/js/panels/crawler.js"></script>
+<script src="/web/js/panels/discovery.js"></script>
+<script src="/web/js/panels/project.js"></script>
+<script src="/web/js/panels/graphql.js"></script>
+<script src="/web/js/panels/live-audit.js"></script>
+<script src="/web/js/panels/browser-scan.js"></script>
+
+<script>
+// Initialize panels registry
+PE.panels = PE.panels || {};
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Tab configuration
+  const tabs = [
+    { id: 'dashboard', label: 'Dashboard', badge: false },
+    { id: 'proxy', label: 'Proxy', badge: true },
+    { id: 'repeater', label: 'Repeater', badge: false },
+    { id: 'intruder', label: 'Intruder', badge: true },
+    { id: 'scanner', label: 'Scanner', badge: true },
+    { id: 'passive', label: 'Passive', badge: true },
+    { id: 'sitemap', label: 'Sitemap', badge: false },
+    { id: 'sequencer', label: 'Sequencer', badge: false },
+    { id: 'comparer', label: 'Comparer', badge: false },
+    { id: 'decoder', label: 'Decoder', badge: false },
+    { id: 'collaborator', label: 'Collaborator', badge: true },
+    { id: 'websocket', label: 'WebSocket', badge: true },
+    { id: 'scope', label: 'Scope', badge: false },
+    { id: 'matchreplace', label: 'Match/Replace', badge: false },
+    { id: 'sessions', label: 'Sessions', badge: false },
+    { id: 'crawler', label: 'Crawler', badge: true },
+    { id: 'discovery', label: 'Discovery', badge: true },
+    { id: 'graphql', label: 'GraphQL', badge: false },
+    { id: 'live-audit', label: 'Live Audit', badge: true },
+    { id: 'browser-scan', label: 'Browser Scan', badge: true },
+    { id: 'project', label: 'Project', badge: false },
+    { id: 'settings', label: 'Settings', badge: false },
+  ];
+
+  // Init tab manager
+  PE.tabManager.init(tabs);
+
+  // Init keyboard shortcuts
+  PE.keyboard.init();
+
+  // Init each panel
+  PE.bus.on('panel:activated', (id) => {
+    const panel = PE.panels[id];
+    const container = PE.tabManager.getPanel(id);
+    if (panel && container) {
+      if (!panel._initialized) {
+        panel.init(container);
+        panel._initialized = true;
+      }
+      panel.refresh?.();
+    }
+  });
+
+  // Initialize default panel
+  const defaultPanel = PE.getSetting('activeTab', 'dashboard');
+  const container = PE.tabManager.getPanel(defaultPanel);
+  const panel = PE.panels[defaultPanel];
+  if (panel && container) {
+    panel.init(container);
+    panel._initialized = true;
+    panel.refresh?.();
+  }
+
+  // Status updates
+  const updateStatus = async () => {
+    try {
+      const s = await PE.api.get('/api/status');
+      PE.$('#status-dot').className = 'dot';
+      PE.$('#status-text').textContent = s.project_name || 'Connected';
+      PE.$('#flow-count').textContent = `${s.flow_count} flows`;
+    } catch (e) {
+      PE.$('#status-dot').className = 'dot error';
+      PE.$('#status-text').textContent = 'Disconnected';
+    }
+  };
+  updateStatus();
+  setInterval(updateStatus, 5000);
+
+  // SSE event handlers for badges
+  PE.bus.on('flow:new', () => PE.tabManager.incrementBadge('proxy'));
+  PE.bus.on('finding:new', () => {
+    PE.tabManager.incrementBadge('scanner');
+    PE.toast.info('New scan finding detected');
+  });
+  PE.bus.on('collab:interaction', () => PE.tabManager.incrementBadge('collaborator'));
+
+  // Navigation events
+  PE.bus.on('navigate:flow', (id) => {
+    PE.tabManager.switchTo('proxy');
+    PE.panels.proxy?.selectFlow?.(id);
+  });
+
+  PE.bus.on('flow:sendToRepeater', (flow) => {
+    PE.tabManager.switchTo('repeater');
+    PE.panels.repeater?.sendRequest?.(flow);
+  });
+
+  PE.bus.on('flow:sendToIntruder', (flow) => {
+    PE.tabManager.switchTo('intruder');
+    PE.panels.intruder?.configureFromFlow?.(flow);
+  });
+
+  PE.bus.on('flow:scan', async (flow) => {
+    try {
+      const result = await PE.api.post('/api/scanner/scan-flow', { flow_id: flow.id });
+      PE.toast.success(`Scan started: ${result.scan_id}`);
+      PE.tabManager.switchTo('scanner');
+    } catch (e) {
+      PE.toast.error(`Scan failed: ${e.message}`);
+    }
+  });
+
+  // Live audit badge update
+  PE.bus.on('finding:new', () => PE.tabManager.incrementBadge('live-audit'));
+
+  // Start SSE
+  PE.init();
+
+  // Apply saved theme on load
+  const savedTheme = localStorage.getItem('pe-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  updateThemeButton(savedTheme);
+});
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('pe-theme', next);
+  updateThemeButton(next);
+}
+
+function updateThemeButton(theme) {
+  const icon = document.getElementById('theme-icon');
+  const label = document.getElementById('theme-label');
+  if (icon) icon.innerHTML = theme === 'dark' ? '&#9790;' : '&#9788;';
+  if (label) label.textContent = theme === 'dark' ? 'Light' : 'Dark';
+}
+</script>
+</body>
+</html>

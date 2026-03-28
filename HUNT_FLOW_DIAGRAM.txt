@@ -1,0 +1,320 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         /HUNT COMMAND FLOW (TARGET)                          ║
+║                                                                              ║
+║                     START: User types "/hunt target"                         ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ STEP 0: Load Hunting Memory                                                  │
+│ ──────────────────────────────────────────────────────────────────────────── │
+│ Command: python memory/load_memory.py target                                 │
+│                                                                              │
+│ Returns:                                                                     │
+│ ✓ Scope freshness (stale, warning, or current)                             │
+│ ✓ Credentials status (valid or expired)                                    │
+│ ✓ Previous hunt patterns (if exists)                                       │
+│ ✓ Dead ends to skip                                                        │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ STEP 0.5: Start Proxy Engine                                                │
+│ ──────────────────────────────────────────────────────────────────────────── │
+│ Check: curl http://127.0.0.1:8187/api/status                               │
+│                                                                              │
+│ If not running:                                                             │
+│   cd C:\Users\vaugh\Desktop\BountyHound\proxy-engine                       │
+│   python main.py &                                                          │
+│                                                                              │
+│ Proxy Engine Functions:                                                     │
+│ ✓ Intercepts web traffic on configured scope                              │
+│ ✓ Runs passive vulnerability scanning                                      │
+│ ✓ Manages authentication sessions                                          │
+│ ✓ Saves all traffic to findings/target/proxy_logs/                        │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ STEP 1: Run Python Orchestrator                                             │
+│ ──────────────────────────────────────────────────────────────────────────── │
+│ Command: python run_hunt.py target                                          │
+│                                                                              │
+│ This handles:                                                               │
+│ ✓ Database check (skip if recently tested)                                │
+│ ✓ Spawns background job processing                                        │
+│ ✓ Coordinates all hunt phases                                             │
+│ ✓ Collects findings into findings/target/                                 │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+                                       │
+                                       ▼
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                      HUNT EXECUTOR PIPELINE                                  ║
+║                                                                              ║
+║  HuntExecutor class coordinates all phases in sequence                       ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+                                       │
+                ┌──────────────────────┼──────────────────────┐
+                │                      │                      │
+                ▼                      ▼                      ▼
+
+    ┌─────────────────────┐  ┌────────────────────┐  ┌─────────────────────┐
+    │  PHASE 0.5:         │  │  PHASE 1:          │  │  PHASE 1.5:         │
+    │  Target Profiling   │  │  RECON             │  │  Discovery Engine   │
+    │  ─────────────────  │  │  ──────────────────│  │  ─────────────────  │
+    │                     │  │                    │  │                     │
+    │ Detect:            │  │ Run:               │  │ Input: Recon data   │
+    │ ✓ Web framework   │  │ ✓ subfinder        │  │ (subdomains, IPs)   │
+    │ ✓ CMS/App type    │  │ ✓ httpx            │  │                     │
+    │ ✓ Tech stack      │  │ ✓ nmap             │  │ Generate:           │
+    │ ✓ API endpoints   │  │                    │  │ ✓ 5-15 hypothesis   │
+    │ ✓ Auth method     │  │ Output: hosts, IPs,│  │   cards             │
+    │                     │  │ ports, services    │  │ ✓ Attack vectors   │
+    │ Timeout: ~2 min    │  │ Timeout: ~5 min    │  │ ✓ Weak points      │
+    │                     │  │                    │  │                     │
+    │ Results → DB       │  │ Results → DB       │  │ Timeout: ~2 min     │
+    └─────────────────────┘  └────────────────────┘  └─────────────────────┘
+                │                      │                      │
+                └──────────────────────┼──────────────────────┘
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ PHASE 2: PARALLEL AGENT TESTING (15 min)                                    │
+│ ──────────────────────────────────────────────────────────────────────────── │
+│                                                                              │
+│ Track A: CLI Tools (background)    │  Track B: Manual Testing              │
+│ ────────────────────────────────   │  ──────────────────────               │
+│                                    │                                       │
+│ ✓ nuclei templates                 │  Test hypothesis cards from          │
+│   └→ calls sync_nuclei_scan()      │  discovery engine                    │
+│                                    │                                       │
+│ ✓ sqlmap SQLi testing              │  Agents used:                        │
+│   └→ calls sync_sqlmap_test()      │  ✓ api_authentication_chain_tester  │
+│                                    │  ✓ business_logic_tester            │
+│ ✓ nmap service detection           │  ✓ oauth_flow_tester                │
+│   └→ calls sync_nmap_scan()        │  ✓ jwt_analyzer                     │
+│                                    │  ✓ deserialization_tester           │
+│ ✓ ffuf directory fuzzing           │  ✓ race_condition_tester            │
+│   └→ calls sync_ffuf_fuzz()        │  ✓ ... (75 total agents)            │
+│                                    │                                       │
+│ ✓ amass subdomain enum             │  Each agent:                         │
+│   └→ calls sync_amass_enum()       │  1. Receives target info             │
+│                                    │  2. Calls tool_bridge functions     │
+│ ✓ nessus vuln scanning             │  3. Returns JSON findings            │
+│   └→ calls sync_nessus_scan()      │                                      │
+│                                    │  Results saved to findings/target/  │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ AGENT EXECUTION FLOW (Each of 75 Agents)                                    │
+│ ──────────────────────────────────────────────────────────────────────────── │
+│                                                                              │
+│  Agent Class Instantiated                                                   │
+│         │                                                                   │
+│         ├─→ from engine.core.tool_bridge import sync_*                     │
+│         │                                                                   │
+│         ├─→ agent.run()                                                    │
+│         │    │                                                             │
+│         │    ├─→ Calls appropriate sync_* function                        │
+│         │    │    (e.g., sync_ffuf_fuzz(), sync_nuclei_scan())           │
+│         │    │                                                             │
+│         │    └─→ Receives HTTP response from microservice                │
+│         │         │                                                        │
+│         │         ├─ job_id: str                                          │
+│         │         ├─ status: str (running/completed/error)               │
+│         │         ├─ results: list[Finding]                              │
+│         │         └─ error: optional[str]                                │
+│         │                                                                 │
+│         └─→ Returns findings dict to hunt executor                        │
+│             {                                                             │
+│               'agent': 'agent_name',                                      │
+│               'tool': 'tool-claude',                                      │
+│               'findings': [...],                                         │
+│               'total': int                                               │
+│             }                                                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ TOOL BRIDGE LAYER (tool_bridge.py) - HTTP Abstraction                       │
+│ ──────────────────────────────────────────────────────────────────────────── │
+│                                                                              │
+│  Agent calls: sync_ffuf_fuzz(url, wordlist, ...)                           │
+│         │                                                                   │
+│         └─→ tool_bridge.sync_ffuf_fuzz()                                   │
+│              │                                                             │
+│              ├─→ Constructs JSON payload                                  │
+│              │                                                             │
+│              ├─→ Makes HTTP POST:                                         │
+│              │   POST http://127.0.0.1:8191/api/fuzz                     │
+│              │   Content-Type: application/json                           │
+│              │                                                             │
+│              └─→ asyncio.run(async_request())                             │
+│                  Returns: dict with job_id, status, results              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+                                       │
+                                       ▼
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                        MICROSERVICES TIER                                    ║
+║                    (Running on localhost 8188-8198)                          ║
+║                                                                              ║
+║  Each microservice is a standalone FastAPI server with job queue           ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ ffuf-claude Microservice (port 8191) - Example                             │
+│ ──────────────────────────────────────────────────────────────────────────  │
+│                                                                            │
+│ HTTP POST /api/fuzz                                                      │
+│                                                                            │
+│ Receives JSON request → Creates async job → Returns immediately          │
+│ {                                                                         │
+│   "job_id": "a3f2e1c9",                                                 │
+│   "status": "running",                                                  │
+│   "message": "Fuzzing started"                                          │
+│ }                                                                         │
+│                                                                            │
+│ Background Task (async):                                                │
+│ ─────────────────────────                                               │
+│ 1. Spawns: ffuf -u {url}/FUZZ -w {wordlist} -json                      │
+│ 2. Parses output                                                        │
+│ 3. Creates FfufResult objects with found endpoints                      │
+│ 4. Updates job.results with findings                                    │
+│ 5. Sets job.status = "completed"                                       │
+│ 6. Auto-cleanup: removes old jobs (max 100 per tool)                   │
+│                                                                            │
+│ HTTP GET /api/fuzz/{job_id}                                             │
+│ Returns current job state (agent polls this if needed):                 │
+│ {                                                                         │
+│   "job_id": "a3f2e1c9",                                                │
+│   "status": "completed",                                               │
+│   "results": [                                                         │
+│     {"url": "target.com/admin", "status": 200, ...},                   │
+│     {"url": "target.com/api", "status": 401, ...},                     │
+│     ...                                                                │
+│   ],                                                                    │
+│   "total_results": 42                                                 │
+│ }                                                                        │
+└────────────────────────────────────────────────────────────────────────────┘
+
+All 11 Microservices Follow Same Pattern:
+├─ nuclei-claude (8188)      /api/scan (POST)
+├─ sqlmap-claude (8189)      /api/test (POST)
+├─ nmap-claude (8190)        /api/scan (POST)
+├─ ffuf-claude (8191)        /api/fuzz (POST)
+├─ amass-claude (8192)       /api/enum (POST)
+├─ gobuster-claude (8193)    /api/enum (POST)
+├─ bloodhound-claude (8194)  /api/enum (POST)
+├─ metasploit-claude (8195)  /api/execute (POST)
+├─ nessus-claude (8196)      /api/scan (POST)
+├─ volatility-claude (8197)  /api/analyze (POST)
+└─ zeek-claude (8198)        /api/analyze (POST)
+
+All return job_id, status, results asynchronously
+
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ PHASE 3: SYNC (2 min) - Merge Results                                       │
+│ ──────────────────────────────────────────────────────────────────────────── │
+│                                                                              │
+│ Merge findings from:                                                       │
+│ ✓ Track A results (cli tools + ffuf, sqlmap, etc)                        │
+│ ✓ Track B results (75 agents testing hypotheses)                         │
+│ ✓ Proxy engine passive scan results                                      │
+│                                                                              │
+│ Detect coverage gaps:                                                      │
+│ ✓ Untested endpoints?                                                    │
+│ ✓ Untested techniques?                                                   │
+│ ✓ Failed hypotheses?                                                     │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ PHASE 4: EXPLOIT (5 min)                                                    │
+│ ──────────────────────────────────────────────────────────────────────────── │
+│                                                                              │
+│ For each high-confidence finding:                                          │
+│ ✓ Target specific CVEs                                                   │
+│ ✓ Call sync_metasploit_execute() to validate                            │
+│ ✓ Capture proof-of-concept                                              │
+│ ✓ Generate remediation advice                                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ PHASE 5: ANALYSIS & CHAINING                                               │
+│ ──────────────────────────────────────────────────────────────────────────── │
+│                                                                              │
+│ From engine/core/chain_validator.py:                                       │
+│ ✓ Combine weak findings into critical chains                              │
+│ ✓ Account takeover path detection                                        │
+│ ✓ Risk scoring (0-10)                                                    │
+│ ✓ Attack path validation                                                 │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ PHASE 6: VALIDATION & REPORTING                                            │
+│ ──────────────────────────────────────────────────────────────────────────── │
+│                                                                              │
+│ Generate HuntReport:                                                       │
+│ {                                                                          │
+│   "target": "target",                                                    │
+│   "duration_seconds": 1847,                                             │
+│   "agents_run": 75,                                                     │
+│   "findings_count": 14,                                                │
+│   "findings": [                                                         │
+│     {                                                                    │
+│       "title": "SQL Injection in /api/login",                          │
+│       "severity": "CRITICAL",                                          │
+│       "source_agent": "sqlmap_injection",                              │
+│       "source_tool": "sqlmap-claude"                                   │
+│     },                                                                  │
+│     ...                                                                │
+│   ]                                                                     │
+│ }                                                                        │
+│                                                                              │
+│ Save to findings/target/:                                                │
+│ ├── report.json                                                        │
+│ ├── report.html                                                        │
+│ ├── findings.csv                                                       │
+│ ├── phases/01_recon.json                                              │
+│ ├── phases/02_discovery.json                                          │
+│ └── credentials/ (for next hunt)                                       │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+                                       │
+                                       ▼
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                       HUNT COMPLETE                                          ║
+║                                                                              ║
+║ Total Time: ~29 minutes                                                    ║
+║ Findings: Saved to findings/target/report.json                            ║
+║                                                                              ║
+║ System Flow:                                                               ║
+║   /hunt target                                                             ║
+║     └→ Load memory                                                         ║
+║     └→ Start proxy-engine (8187)                                           ║
+║     └→ Run orchestrator + 6 phases                                         ║
+║     └→ Dispatch 75 agents in parallel                                      ║
+║     └→ Agents call tool_bridge functions                                   ║
+║     └→ tool_bridge makes HTTP calls to microservices (8188-8198)          ║
+║     └→ Microservices execute tools asynchronously                          ║
+║     └→ Results flow back to agents → hunt executor                         ║
+║     └→ Generate report                                                     ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝

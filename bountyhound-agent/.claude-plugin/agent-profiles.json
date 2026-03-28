@@ -1,0 +1,169 @@
+{
+  "profiles": {
+    "core": {
+      "description": "Always active - essential hunting agents",
+      "agents": [
+        "phased-hunter",
+        "discovery-engine",
+        "poc-validator",
+        "reporter-agent",
+        "auth-manager",
+        "scope-manager"
+      ]
+    },
+    "web": {
+      "description": "Web application testing (activate for web targets)",
+      "agents": [
+        "injection-tester-pro",
+        "graphql-advanced-tester",
+        "graphql-enumerator",
+        "graphql-security-scanner-advanced",
+        "api-fuzzing-orchestrator",
+        "api-gateway-bypass-tester",
+        "api-endpoint-parameter-miner",
+        "api-schema-analyzer",
+        "jwt-analyzer",
+        "jwt-security-comprehensive",
+        "cors-tester",
+        "csrf-tester",
+        "authentication-bypass-tester",
+        "authorization-boundary-tester",
+        "session-analyzer",
+        "session-management-comprehensive",
+        "oauth-flow-tester",
+        "saml-security-tester",
+        "cookie-security-tester",
+        "xxe-tester",
+        "xml-external-entity-advanced",
+        "ssrf-tester",
+        "server-side-template-injection-tester",
+        "deserialization-tester",
+        "prototype-pollution-tester",
+        "business-logic-tester",
+        "business-logic-vulnerability-finder"
+      ]
+    },
+    "api": {
+      "description": "API-specific testing (REST/GraphQL/gRPC)",
+      "agents": [
+        "api-abuse-detection-bypasser",
+        "api-authentication-chain-tester",
+        "api-documentation-scanner",
+        "api-fuzzer",
+        "api-rate-limit-tester",
+        "api-response-analyzer",
+        "api-security-best-practices-validator",
+        "api-versioning-tester",
+        "grpc-security-tester",
+        "mobile-api-tester"
+      ]
+    },
+    "blockchain": {
+      "description": "Blockchain/Web3 testing (activate for crypto targets)",
+      "agents": [
+        "blockchain-security-scanner",
+        "blockchain-solidity-auditor"
+      ]
+    },
+    "mobile": {
+      "description": "Mobile app testing (activate for iOS/Android)",
+      "agents": [
+        "mobile-android-reverser",
+        "mobile-ios-reverser"
+      ]
+    },
+    "cloud": {
+      "description": "Cloud infrastructure testing (AWS/GCP/Azure)",
+      "agents": [
+        "cloud-security-tester",
+        "cloud-storage-scanner",
+        "cloud-aws-auditor",
+        "aws-security-tester",
+        "container-registry-scanner",
+        "kubernetes-security-tester",
+        "container-security-tester",
+        "serverless-security-tester"
+      ]
+    },
+    "infrastructure": {
+      "description": "Network and infrastructure testing",
+      "agents": [
+        "network-security-scanner",
+        "dns-security-tester",
+        "ssl-certificate-analyzer",
+        "cdn-configuration-analyzer",
+        "cdn-bypass-engine",
+        "load-balancer-security-tester",
+        "reverse-proxy-bypass-tester"
+      ]
+    },
+    "advanced": {
+      "description": "Advanced attacks and research",
+      "agents": [
+        "http-request-smuggling-tester",
+        "cache-poisoning-tester",
+        "web-cache-behavior-analyzer",
+        "host-header-injection-tester",
+        "waf-bypass-engine",
+        "account-takeover-chain-builder",
+        "exploit-chain-optimizer",
+        "chain-discovery-engine",
+        "privilege-escalation-chain-builder",
+        "zero-day-discovery-engine",
+        "ai-pattern-recognizer"
+      ]
+    },
+    "recon": {
+      "description": "Reconnaissance and OSINT",
+      "agents": [
+        "automated-reconnaissance-engine",
+        "subdomain-enumeration-engine",
+        "subdomain-takeover-hunter",
+        "attack-surface-mapper",
+        "technology-fingerprinting-engine",
+        "osint-automation-engine"
+      ]
+    },
+    "specialized": {
+      "description": "Niche targets (IoT, firmware, games, etc.)",
+      "agents": [
+        "iot-security-tester",
+        "omnihack-anticheat-analyst-agent",
+        "omnihack-binary-analyst-agent",
+        "omnihack-game-hacker-agent",
+        "omnihack-kernel-researcher-agent",
+        "omnihack-memory-analyst-agent",
+        "omnihack-mobile-reverser-agent"
+      ]
+    },
+    "cicd": {
+      "description": "CI/CD and supply chain security",
+      "agents": [
+        "ci-cd-pipeline-tester",
+        "supply-chain-security-analyzer"
+      ]
+    }
+  },
+  "default_enabled": ["core", "web", "api"],
+  "auto_activate": {
+    "description": "Auto-activate profiles based on target detection",
+    "rules": [
+      {
+        "condition": "target matches *.blockchain.* OR tech_stack contains 'solidity'",
+        "activate": ["blockchain"]
+      },
+      {
+        "condition": "platform is mobile OR tech_stack contains 'react-native'",
+        "activate": ["mobile"]
+      },
+      {
+        "condition": "tech_stack contains 'aws' OR 's3' found",
+        "activate": ["cloud"]
+      },
+      {
+        "condition": "tech_stack contains 'kubernetes' OR 'docker'",
+        "activate": ["cloud", "infrastructure"]
+      }
+    ]
+  }
+}

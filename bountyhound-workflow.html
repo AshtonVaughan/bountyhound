@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BountyHound — Hunt Workflow</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #070b14;
+  --surface:  #0d1525;
+  --surface2: #111b2e;
+  --border:   rgba(0,212,255,.1);
+  --cyan:     #00d4ff;
+  --green:    #00ff88;
+  --orange:   #ff8c42;
+  --red:      #ff4757;
+  --purple:   #a855f7;
+  --yellow:   #ffd60a;
+  --text:     #d8e2f5;
+  --muted:    #4e6080;
+  --line:     rgba(0,212,255,.3);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Dot-grid background */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(rgba(0,212,255,.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none; z-index: 0;
+}
+
+/* Slow scanline sweep */
+.scanline {
+  position: fixed; left: 0; right: 0; height: 180px; top: 0;
+  background: linear-gradient(180deg, rgba(0,212,255,.04), transparent);
+  pointer-events: none; z-index: 0;
+  animation: sweep 14s linear infinite;
+}
+@keyframes sweep {
+  from { transform: translateY(-180px); }
+  to   { transform: translateY(105vh); }
+}
+
+/* ── Page layout ───────────────────────────── */
+
+.page {
+  position: relative; z-index: 1;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 64px 28px 120px;
+}
+
+/* ── Header ────────────────────────────────── */
+
+.header { text-align: center; margin-bottom: 72px; }
+
+.eyebrow {
+  font-family: 'Courier New', monospace;
+  font-size: .65rem; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 14px;
+}
+
+.title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800; letter-spacing: -.04em; line-height: 1;
+  background: linear-gradient(110deg, var(--cyan) 0%, var(--green) 55%, var(--cyan) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 6s linear infinite;
+  margin-bottom: 10px;
+}
+@keyframes shimmer {
+  from { background-position: 0% center; }
+  to   { background-position: 200% center; }
+}
+
+.subtitle {
+  font-family: 'Courier New', monospace;
+  font-size: .85rem; color: var(--muted);
+}
+
+.header-rule {
+  width: 80px; height: 1px; margin: 22px auto 0;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+}
+
+/* ── Legend ────────────────────────────────── */
+
+.legend {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: 18px; margin-bottom: 56px;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 7px;
+  font-family: 'Courier New', monospace;
+  font-size: .65rem; letter-spacing: .06em; color: var(--muted);
+}
+.legend-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+
+/* ── Flow column ───────────────────────────── */
+
+.flow {
+  display: flex; flex-direction: column; align-items: center;
+}
+
+/* Connector ↓ */
+.arrow {
+  width: 2px;
+  background: linear-gradient(180deg, var(--line), rgba(0,212,255,.05));
+  position: relative; flex-shrink: 0;
+  --h: 52px; height: var(--h);
+}
+.arrow::after {
+  content: '';
+  position: absolute; bottom: -7px; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top: 8px solid rgba(0,212,255,.5);
+}
+.arrow.sm { --h: 32px; }
+.arrow.lg { --h: 72px; }
+
+/* ── Node card ─────────────────────────────── */
+
+.node {
+  width: 100%; max-width: 620px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px 26px;
+  position: relative;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  cursor: default;
+  opacity: 0;
+  animation: riseIn .45s ease forwards;
+}
+.node:hover { transform: translateY(-3px); }
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Stagger delays */
+.node:nth-of-type(1)  { animation-delay: .00s; }
+.node:nth-of-type(2)  { animation-delay: .06s; }
+.node:nth-of-type(3)  { animation-delay: .12s; }
+.node:nth-of-type(4)  { animation-delay: .18s; }
+.node:nth-of-type(5)  { animation-delay: .24s; }
+.node:nth-of-type(6)  { animation-delay: .30s; }
+.node:nth-of-type(7)  { animation-delay: .36s; }
+.node:nth-of-type(8)  { animation-delay: .42s; }
+.node:nth-of-type(9)  { animation-delay: .48s; }
+.node:nth-of-type(10) { animation-delay: .54s; }
+.node:nth-of-type(11) { animation-delay: .60s; }
+.node:nth-of-type(12) { animation-delay: .66s; }
+.node:nth-of-type(13) { animation-delay: .72s; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: 'Courier New', monospace;
+  font-size: .62rem; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.badge-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+}
+
+.node-title {
+  font-size: 1.05rem; font-weight: 700;
+  color: var(--text); line-height: 1.25;
+  margin-bottom: 7px;
+}
+
+.node-body {
+  font-size: .8rem; color: var(--muted);
+  line-height: 1.65; margin-bottom: 0;
+}
+
+.tags {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-top: 14px;
+}
+.tag {
+  font-family: 'Courier New', monospace;
+  font-size: .62rem; font-weight: 500;
+  padding: 3px 9px; border-radius: 5px;
+  letter-spacing: .03em;
+}
+
+/* ── Color themes ──────────────────────────── */
+
+/* cyan */
+.c-cyan .badge        { color: var(--cyan); }
+.c-cyan .badge-dot    { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
+.c-cyan               { border-color: rgba(0,212,255,.2); }
+.c-cyan:hover         { border-color: rgba(0,212,255,.5); box-shadow: 0 0 28px rgba(0,212,255,.12); }
+
+/* green */
+.c-green .badge       { color: var(--green); }
+.c-green .badge-dot   { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.c-green              { border-color: rgba(0,255,136,.2); }
+.c-green:hover        { border-color: rgba(0,255,136,.5); box-shadow: 0 0 28px rgba(0,255,136,.12); }
+
+/* orange */
+.c-orange .badge      { color: var(--orange); }
+.c-orange .badge-dot  { background: var(--orange); box-shadow: 0 0 6px var(--orange); }
+.c-orange             { border-color: rgba(255,140,66,.2); }
+.c-orange:hover       { border-color: rgba(255,140,66,.5); box-shadow: 0 0 28px rgba(255,140,66,.12); }
+
+/* purple */
+.c-purple .badge      { color: var(--purple); }
+.c-purple .badge-dot  { background: var(--purple); box-shadow: 0 0 6px var(--purple); }
+.c-purple             { border-color: rgba(168,85,247,.2); }
+.c-purple:hover       { border-color: rgba(168,85,247,.5); box-shadow: 0 0 28px rgba(168,85,247,.12); }
+
+/* yellow */
+.c-yellow .badge      { color: var(--yellow); }
+.c-yellow .badge-dot  { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+.c-yellow             { border-color: rgba(255,214,10,.2); }
+.c-yellow:hover       { border-color: rgba(255,214,10,.5); box-shadow: 0 0 28px rgba(255,214,10,.12); }
+
+/* tag variants */
+.t-cyan   { background: rgba(0,212,255,.07);  color: var(--cyan);   border: 1px solid rgba(0,212,255,.18); }
+.t-green  { background: rgba(0,255,136,.07);  color: var(--green);  border: 1px solid rgba(0,255,136,.18); }
+.t-orange { background: rgba(255,140,66,.07); color: var(--orange); border: 1px solid rgba(255,140,66,.18); }
+.t-purple { background: rgba(168,85,247,.07); color: var(--purple); border: 1px solid rgba(168,85,247,.18); }
+.t-yellow { background: rgba(255,214,10,.07); color: var(--yellow); border: 1px solid rgba(255,214,10,.18); }
+.t-red    { background: rgba(255,71,87,.07);  color: var(--red);    border: 1px solid rgba(255,71,87,.18); }
+.t-dim    { background: rgba(78,96,128,.07);  color: var(--muted);  border: 1px solid rgba(78,96,128,.18); }
+
+/* ── Start node ────────────────────────────── */
+
+.node-start {
+  text-align: center;
+  padding: 28px 32px;
+  border-color: rgba(0,255,136,.3);
+  background: linear-gradient(145deg, #0a1a1f, #0d1525);
+  animation: riseIn .4s ease forwards, glowPulse 4s ease-in-out 0.4s infinite;
+}
+@keyframes glowPulse {
+  0%,100% { box-shadow: 0 0 20px rgba(0,255,136,.12); }
+  50%      { box-shadow: 0 0 45px rgba(0,255,136,.28); }
+}
+.start-pre {
+  font-family: 'Courier New', monospace;
+  font-size: .65rem; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 10px;
+}
+.start-cmd {
+  font-family: 'Courier New', monospace;
+  font-size: 1.65rem; font-weight: 700;
+  color: var(--green); letter-spacing: -.01em;
+}
+.start-cmd .prompt { color: rgba(0,255,136,.35); }
+.start-sub {
+  margin-top: 10px; font-size: .76rem;
+  color: var(--muted);
+}
+
+/* ── Mode grid ─────────────────────────────── */
+
+.mode-wrap { width: 100%; max-width: 620px; }
+
+.mode-header {
+  text-align: center;
+  font-family: 'Courier New', monospace;
+  font-size: .63rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 10px;
+}
+
+.mode-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+}
+
+.mode-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px;
+  text-align: center;
+  transition: border-color .2s, box-shadow .2s;
+}
+.mode-card:hover { transform: translateY(-2px); }
+
+.mode-name {
+  font-family: 'Courier New', monospace;
+  font-size: .72rem; font-weight: 700;
+  margin-bottom: 7px;
+}
+.mode-items { font-size: .71rem; color: var(--muted); line-height: 1.7; }
+
+.mode-card.full   { border-color: rgba(0,255,136,.2); }
+.mode-card.full   .mode-name { color: var(--green); }
+.mode-card.full:hover   { border-color: rgba(0,255,136,.4); box-shadow: 0 0 16px rgba(0,255,136,.08); }
+
+.mode-card.browser { border-color: rgba(0,212,255,.2); }
+.mode-card.browser .mode-name { color: var(--cyan); }
+.mode-card.browser:hover { border-color: rgba(0,212,255,.4); box-shadow: 0 0 16px rgba(0,212,255,.08); }
+
+.mode-card.minimal { border-color: rgba(78,96,128,.2); }
+.mode-card.minimal .mode-name { color: var(--muted); }
+.mode-card.minimal:hover { border-color: rgba(78,96,128,.4); }
+
+/* ── Parallel tools ────────────────────────── */
+
+.parallel-wrap { width: 100%; max-width: 620px; }
+
+.parallel-header {
+  text-align: center;
+  font-family: 'Courier New', monospace;
+  font-size: .63rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 10px;
+}
+
+.parallel-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px;
+}
+
+.p-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 16px;
+  display: flex; align-items: flex-start; gap: 11px;
+  transition: border-color .2s;
+}
+.p-card:hover { border-color: rgba(0,212,255,.25); }
+
+.p-icon { font-size: 1.15rem; flex-shrink: 0; margin-top: 1px; }
+.p-name {
+  font-family: 'Courier New', monospace;
+  font-size: .71rem; font-weight: 700; margin-bottom: 4px;
+}
+.p-desc { font-size: .7rem; color: var(--muted); line-height: 1.5; }
+
+/* ── Decision node ─────────────────────────── */
+
+.decision-wrap { width: 100%; max-width: 620px; }
+
+.decision-node {
+  background: var(--surface);
+  border: 1px solid rgba(255,140,66,.3);
+  border-radius: 14px; padding: 18px 24px;
+  text-align: center; position: relative;
+}
+.decision-node::before {
+  content: '◆';
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  color: var(--orange); font-size: .95rem;
+  text-shadow: 0 0 10px rgba(255,140,66,.6);
+}
+.decision-label {
+  font-family: 'Courier New', monospace;
+  font-size: .72rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--orange); margin-bottom: 4px;
+}
+.decision-sub { font-size: .76rem; color: var(--muted); }
+
+/* ── Branch split ──────────────────────────── */
+
+.branch-split {
+  width: 100%; max-width: 620px;
+  display: grid; grid-template-columns: 1fr 1fr;
+  position: relative;
+}
+
+/* horizontal connecting bar */
+.branch-split::before {
+  content: '';
+  position: absolute; top: 0; left: 25%; right: 25%; height: 1px;
+  background: rgba(255,140,66,.25);
+}
+
+.branch { display: flex; flex-direction: column; align-items: center; }
+
+.branch-label {
+  font-family: 'Courier New', monospace;
+  font-size: .62rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  margin-bottom: 6px; padding: 3px 10px;
+  border-radius: 5px;
+}
+.branch-label.yes { color: var(--green); background: rgba(0,255,136,.07); border: 1px solid rgba(0,255,136,.2); }
+.branch-label.no  { color: var(--red);   background: rgba(255,71,87,.07);  border: 1px solid rgba(255,71,87,.2); }
+
+.branch-line {
+  width: 2px; height: 36px; position: relative;
+}
+.branch-yes-line { background: linear-gradient(180deg, rgba(0,255,136,.4), rgba(0,255,136,.1)); }
+.branch-yes-line::after {
+  content: ''; position: absolute; bottom: -7px; left: 50%; transform: translateX(-50%);
+  border: 5px solid transparent; border-top: 7px solid rgba(0,255,136,.5);
+}
+.branch-no-line { background: linear-gradient(180deg, rgba(255,71,87,.4), rgba(255,71,87,.1)); }
+.branch-no-line::after {
+  content: ''; position: absolute; bottom: -7px; left: 50%; transform: translateX(-50%);
+  border: 5px solid transparent; border-top: 7px solid rgba(255,71,87,.4);
+}
+
+.discard-card {
+  background: rgba(255,71,87,.05);
+  border: 1px solid rgba(255,71,87,.2);
+  border-radius: 10px; padding: 14px 18px;
+  text-align: center; max-width: 220px;
+}
+.discard-title { font-size: .88rem; font-weight: 700; color: var(--red); margin-bottom: 4px; }
+.discard-sub   { font-size: .72rem; color: var(--muted); }
+
+/* ── Loop-back note ────────────────────────── */
+
+.loop-note {
+  width: 100%; max-width: 620px;
+  background: rgba(255,140,66,.04);
+  border: 1px dashed rgba(255,140,66,.25);
+  border-radius: 10px; padding: 12px 18px;
+  display: flex; align-items: center; gap: 12px;
+  font-size: .76rem; color: var(--muted);
+}
+.loop-icon { font-size: 1.1rem; color: var(--orange); flex-shrink: 0; }
+.loop-note strong { color: var(--orange); }
+
+/* ── End node ──────────────────────────────── */
+
+.node-end {
+  text-align: center;
+  background: linear-gradient(145deg, rgba(168,85,247,.05), rgba(0,212,255,.03));
+  border-color: rgba(168,85,247,.25);
+}
+.node-end:hover { border-color: rgba(168,85,247,.5); box-shadow: 0 0 28px rgba(168,85,247,.12); }
+
+/* ── Align arrow below YES branch ─────────────── */
+
+.arrow.yes-aligned {
+  align-self: flex-start;
+  margin-left: calc(25% - 1px);
+}
+
+/* ── Section spacing ───────────────────────── */
+
+.flow > * {
+  animation: riseIn .45s ease both;
+}
+
+/* override per-child delays for non-node elements */
+.flow > *:nth-child(1)  { animation-delay: .00s; }
+.flow > *:nth-child(2)  { animation-delay: .04s; }
+.flow > *:nth-child(3)  { animation-delay: .08s; }
+.flow > *:nth-child(4)  { animation-delay: .12s; }
+.flow > *:nth-child(5)  { animation-delay: .16s; }
+.flow > *:nth-child(6)  { animation-delay: .20s; }
+.flow > *:nth-child(7)  { animation-delay: .24s; }
+.flow > *:nth-child(8)  { animation-delay: .28s; }
+.flow > *:nth-child(9)  { animation-delay: .32s; }
+.flow > *:nth-child(10) { animation-delay: .36s; }
+.flow > *:nth-child(11) { animation-delay: .40s; }
+.flow > *:nth-child(12) { animation-delay: .44s; }
+.flow > *:nth-child(13) { animation-delay: .48s; }
+.flow > *:nth-child(14) { animation-delay: .52s; }
+.flow > *:nth-child(15) { animation-delay: .56s; }
+.flow > *:nth-child(16) { animation-delay: .60s; }
+.flow > *:nth-child(17) { animation-delay: .64s; }
+.flow > *:nth-child(18) { animation-delay: .68s; }
+.flow > *:nth-child(19) { animation-delay: .72s; }
+.flow > *:nth-child(20) { animation-delay: .76s; }
+.flow > *:nth-child(21) { animation-delay: .80s; }
+.flow > *:nth-child(22) { animation-delay: .84s; }
+.flow > *:nth-child(23) { animation-delay: .88s; }
+.flow > *:nth-child(24) { animation-delay: .92s; }
+.flow > *:nth-child(25) { animation-delay: .96s; }
+
+/* code inline */
+code {
+  font-family: 'Courier New', monospace; font-size: .8em;
+  padding: 1px 5px; border-radius: 4px;
+}
+.c-cyan  code { background: rgba(0,212,255,.08);  color: var(--cyan); }
+.c-green code { background: rgba(0,255,136,.08);  color: var(--green); }
+.c-orange code { background: rgba(255,140,66,.08); color: var(--orange); }
+.c-yellow code { background: rgba(255,214,10,.08); color: var(--yellow); }
+.c-purple code { background: rgba(168,85,247,.08); color: var(--purple); }
+
+/* ── Footer ────────────────────────────────── */
+
+.footer {
+  text-align: center; margin-top: 80px;
+  font-family: 'Courier New', monospace;
+  font-size: .65rem; letter-spacing: .12em;
+  color: rgba(78,96,128,.4);
+}
+
+/* ── Responsive ────────────────────────────── */
+
+@media (max-width: 580px) {
+  .mode-grid      { grid-template-columns: 1fr; }
+  .parallel-grid  { grid-template-columns: 1fr; }
+  .branch-split   { grid-template-columns: 1fr; gap: 12px; }
+  .branch-split::before { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="scanline"></div>
+
+<div class="page">
+
+  <!-- ── Header ── -->
+  <header class="header">
+    <div class="eyebrow">Bug Bounty Automation System</div>
+    <h1 class="title">BountyHound Workflow</h1>
+    <p class="subtitle">$ /hunt &lt;target&gt; &nbsp;→&nbsp; verified finding</p>
+    <div class="header-rule"></div>
+  </header>
+
+  <!-- ── Legend ── -->
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot" style="background:var(--cyan)"></span>Recon / Infrastructure</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>Execution / Validation</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--orange)"></span>Analysis / Decision</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--yellow)"></span>Scope / Reporting</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--purple)"></span>Memory / Learning</span>
+  </div>
+
+  <!-- ── Flow ── -->
+  <div class="flow">
+
+    <!-- START -->
+    <div class="node node-start">
+      <div class="start-pre">Trigger</div>
+      <div class="start-cmd"><span class="prompt">$ </span>/hunt &lt;target&gt;</div>
+      <div class="start-sub">Autonomous hunt session begins</div>
+    </div>
+
+    <div class="arrow"></div>
+
+    <!-- STEP 0 -->
+    <div class="node c-cyan">
+      <div class="badge"><span class="badge-dot"></span>Step 0 &nbsp;·&nbsp; Capability Check</div>
+      <div class="node-title">Probe local infrastructure</div>
+      <div class="node-body">Run three checks before touching the target. Behavior adapts to what exists — never block on missing tools. Chrome browser is always available regardless of mode.</div>
+      <div class="tags">
+        <span class="tag t-cyan">bountyhound doctor</span>
+        <span class="tag t-cyan">proxy :8187</span>
+        <span class="tag t-cyan">MCP tools :8188</span>
+      </div>
+    </div>
+
+    <div class="arrow sm"></div>
+
+    <!-- MODES -->
+    <div class="mode-wrap">
+      <div class="mode-header">Operating Mode (adapts automatically)</div>
+      <div class="mode-grid">
+        <div class="mode-card full">
+          <div class="mode-name">Full</div>
+          <div class="mode-items">CLI pipeline<br>+ proxy engine<br>+ MCP tools<br>+ Chrome</div>
+        </div>
+        <div class="mode-card browser">
+          <div class="mode-name">Browser-Only</div>
+          <div class="mode-items">Chrome browser<br>+ curl<br>+ proxy passive</div>
+        </div>
+        <div class="mode-card minimal">
+          <div class="mode-name">Minimal</div>
+          <div class="mode-items">Chrome + curl<br>still finds bugs<br>every time</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow"></div>
+
+    <!-- STEP 0.5 -->
+    <div class="node c-cyan">
+      <div class="badge"><span class="badge-dot"></span>Step 0.5 &nbsp;·&nbsp; Load Context</div>
+      <div class="node-title">Prime memory before touching anything</div>
+      <div class="node-body">Run <code>load_memory.py</code> for a compact summary of all memory layers. Act on every warning immediately — stale scope or expired creds are blockers, not suggestions.</div>
+      <div class="tags">
+        <span class="tag t-cyan">hunting-playbook.md</span>
+        <span class="tag t-cyan">identity.md (email roles)</span>
+        <span class="tag t-orange">scope stale &gt;30d → re-parse first</span>
+        <span class="tag t-orange">creds expired → refresh before auth testing</span>
+        <span class="tag t-dim">patterns.md (cross-target)</span>
+      </div>
+    </div>
+
+    <div class="arrow"></div>
+
+    <!-- STEP 0.75 -->
+    <div class="node c-yellow">
+      <div class="badge"><span class="badge-dot"></span>Step 0.75 &nbsp;·&nbsp; Program Map</div>
+      <div class="node-title">Read the full program page with Chrome</div>
+      <div class="node-body">Navigate to HackerOne / Bugcrowd. Read every section verbatim: In-Scope, Out-of-Scope, Policy, Rewards, pinned notes. Hard abort if primary domain is not listed in-scope.</div>
+      <div class="tags">
+        <span class="tag t-yellow">in-scope assets + types</span>
+        <span class="tag t-red">out-of-scope → hard stop, do not test</span>
+        <span class="tag t-yellow">bounty table</span>
+        <span class="tag t-dim">saved to program-map.md</span>
+        <span class="tag t-dim">scope.md last_verified = today</span>
+      </div>
+    </div>
+
+    <div class="arrow"></div>
+
+    <!-- STEP 1 -->
+    <div class="node c-green">
+      <div class="badge"><span class="badge-dot"></span>Step 1 &nbsp;·&nbsp; Recon</div>
+      <div class="node-title">CLI pipeline + parallel MCP tools</div>
+      <div class="node-body">Start the CLI recon pipeline, then launch MCP tools in parallel without waiting. Move ahead — poll their results before hypothesis generation. Recon diff surfaces new attack surface for top priority.</div>
+      <div class="tags">
+        <span class="tag t-green">subfinder + httpx + nmap</span>
+        <span class="tag t-dim">01_recon.json</span>
+        <span class="tag t-cyan">recon diff → new subdomains = highest priority</span>
+      </div>
+    </div>
+
+    <div class="arrow sm"></div>
+
+    <!-- PARALLEL TOOLS -->
+    <div class="parallel-wrap">
+      <div class="parallel-header">Launched in parallel (async — do not wait)</div>
+      <div class="parallel-grid">
+        <div class="p-card">
+          <div class="p-icon">&#x1F50D;</div>
+          <div>
+            <div class="p-name" style="color:var(--cyan)">amass_enum</div>
+            <div class="p-desc">Passive + active subdomain enumeration. Broadens attack surface beyond subfinder.</div>
+          </div>
+        </div>
+        <div class="p-card">
+          <div class="p-icon">&#x1F5FA;</div>
+          <div>
+            <div class="p-name" style="color:var(--green)">nmap_scan (sV)</div>
+            <div class="p-desc">Service fingerprinting. Reveals non-HTTP ports, software versions, misconfigs.</div>
+          </div>
+        </div>
+        <div class="p-card">
+          <div class="p-icon">&#x26A1;</div>
+          <div>
+            <div class="p-name" style="color:var(--orange)">nuclei_scan</div>
+            <div class="p-desc">CVE templates, misconfigurations, exposure checks. severity: critical,high,medium.</div>
+          </div>
+        </div>
+        <div class="p-card">
+          <div class="p-icon">&#x1F310;</div>
+          <div>
+            <div class="p-name" style="color:var(--muted)">background CLI scan</div>
+            <div class="p-desc">Full nuclei + crawl in background. Don't wait — start manual testing immediately.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow"></div>
+
+    <!-- STEP 1.5 -->
+    <div class="node c-cyan">
+      <div class="badge"><span class="badge-dot"></span>Step 1.5 &nbsp;·&nbsp; Database Checks</div>
+      <div class="node-title">Query history before generating hypotheses</div>
+      <div class="node-body">Check BountyHound DB for this specific target. Personalize hypothesis priority based on what's actually worked — not just global playbook order. Skip if tested &lt;7 days ago.</div>
+      <div class="tags">
+        <span class="tag t-cyan">before_test() → skip if &lt;7d</span>
+        <span class="tag t-green">acceptance rate per vuln type</span>
+        <span class="tag t-orange">promote high-acceptance types</span>
+        <span class="tag t-dim">successful payloads for this stack</span>
+        <span class="tag t-dim">target ROI ranking</span>
+      </div>
+    </div>
+
+    <div class="arrow"></div>
+
+    <!-- STEP 2 -->
+    <div class="node c-orange">
+      <div class="badge"><span class="badge-dot"></span>Step 2 &nbsp;·&nbsp; Hypothesis Generation</div>
+      <div class="node-title">Think before you touch anything</div>
+      <div class="node-body">Generate 5–15 hypothesis cards before running a single test. Reason from your security knowledge first, then calibrate with DB data and cross-target patterns. New attack surface from recon diff = top priority.</div>
+      <div class="tags">
+        <span class="tag t-orange">tech stack → attack surface table</span>
+        <span class="tag t-orange">playbook priority: IDOR &gt; auth &gt; logic &gt; SSRF &gt; injection</span>
+        <span class="tag t-cyan">patterns.md (seeded + confirmed)</span>
+        <span class="tag t-green">recon diff → highest priority cards</span>
+        <span class="tag t-dim">5–15 cards with Priority: HIGH / MED / LOW</span>
+      </div>
+    </div>
+
+    <div class="arrow"></div>
+
+    <!-- STEP 3 -->
+    <div class="node c-green">
+      <div class="badge"><span class="badge-dot"></span>Step 3 &nbsp;·&nbsp; Test Hypotheses</div>
+      <div class="node-title">Work priority order — right tool per hypothesis</div>
+      <div class="node-body">WebFetch for quick public GET recon. Chrome browser for anything authenticated, JS-heavy, or requiring two accounts. MCP tools for automation. Spawn specialist agents for complex surfaces. Validate or rule out before moving to next card.</div>
+      <div class="tags">
+        <span class="tag t-cyan">Chrome (auth, IDOR, SPA, network capture)</span>
+        <span class="tag t-orange">sqlmap · ffuf · gobuster (MCP)</span>
+        <span class="tag t-purple">JWT agent · GraphQL agent · OAuth agent</span>
+        <span class="tag t-green">two accounts always for IDOR tests</span>
+        <span class="tag t-dim">WebFetch = public GET only (no auth, no JS)</span>
+        <span class="tag t-dim">pipe all verbose output to /tmp</span>
+      </div>
+    </div>
+
+    <div class="arrow sm"></div>
+
+    <!-- LOOP NOTE -->
+    <div class="loop-note">
+      <span class="loop-icon">&#x21A9;</span>
+      <span>Nothing found after all HIGH + MED cards &nbsp;&rarr;&nbsp; <strong>Gap-triggered discovery wave</strong> — generate new hypotheses targeting untested surfaces, loop back to <strong>Step 2</strong></span>
+    </div>
+
+    <div class="arrow sm"></div>
+
+    <!-- DECISION -->
+    <div class="decision-wrap">
+      <div class="decision-node">
+        <div class="decision-label">Finding confirmed?</div>
+        <div class="decision-sub">Must pass gate checklist before reporting</div>
+      </div>
+    </div>
+
+    <div class="arrow sm"></div>
+
+    <!-- STEP 4 -->
+    <div class="node c-green">
+      <div class="badge"><span class="badge-dot"></span>Step 4 &nbsp;·&nbsp; Validate &amp; Gate</div>
+      <div class="node-title">Independent validation — no shortcuts</div>
+      <div class="node-body">Spawn <code>poc-validator</code> agent — real HTTP requests, CONFIRMED or REJECTED verdict with raw output. All five gate checks must pass before a report is written.</div>
+      <div class="tags">
+        <span class="tag t-green">poc-validator agent</span>
+        <span class="tag t-green">curl proof saved to proof.json</span>
+        <span class="tag t-red">check_duplicate() — do not submit if dup</span>
+        <span class="tag t-orange">CVSS 4.0+ (Medium or above)</span>
+        <span class="tag t-yellow">both asset + vuln type in-scope</span>
+        <span class="tag t-dim">not on playbook skip list</span>
+      </div>
+    </div>
+
+    <div class="arrow sm"></div>
+
+    <!-- BRANCH SPLIT -->
+    <div class="branch-split">
+      <div class="branch">
+        <div class="branch-label yes">&#x2713; Confirmed</div>
+        <div class="branch-line branch-yes-line"></div>
+      </div>
+      <div class="branch">
+        <div class="branch-label no">&#x2717; Rejected</div>
+        <div class="branch-line branch-no-line"></div>
+        <div class="discard-card">
+          <div class="discard-title">Discard</div>
+          <div class="discard-sub">False positive — do not report. Note what failed and why.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- arrow aligned under YES branch -->
+    <div class="arrow yes-aligned"></div>
+
+    <!-- REPORT -->
+    <div class="node c-yellow">
+      <div class="badge"><span class="badge-dot"></span>Report &nbsp;·&nbsp; Write &amp; Submit</div>
+      <div class="node-title">Frame around business impact, not technical jargon</div>
+      <div class="node-body">Load <code>report-psychology</code> skill. Triagers reproduce on first attempt or they close it. Every curl must be copy-paste ready. Ambiguous responses explained inline.</div>
+      <div class="tags">
+        <span class="tag t-yellow">report-psychology skill</span>
+        <span class="tag t-green">reproduce.py standalone (prints VULNERABLE / NOT)</span>
+        <span class="tag t-cyan">Expected vs Actual section</span>
+        <span class="tag t-dim">before/after screenshots</span>
+        <span class="tag t-orange">CVSS per-metric justification</span>
+        <span class="tag t-dim">two-account IDOR proof</span>
+      </div>
+    </div>
+
+    <div class="arrow"></div>
+
+    <!-- STEP 5 -->
+    <div class="node c-purple">
+      <div class="badge"><span class="badge-dot"></span>Step 5 &nbsp;·&nbsp; Update Memory</div>
+      <div class="node-title">Spawn background haiku agent — never in main context</div>
+      <div class="node-body">Update all memory layers with what was learned this hunt. System gets smarter per target over time. Patterns confirmed across multiple targets go to <code>patterns.md</code>.</div>
+      <div class="tags">
+        <span class="tag t-purple">haiku agent (background, run_in_background: true)</span>
+        <span class="tag t-purple">context.md → new hunt entry (max 5, rotates)</span>
+        <span class="tag t-purple">defenses.md → merge, never overwrite</span>
+        <span class="tag t-cyan">patterns.md → verified cross-target techniques</span>
+        <span class="tag t-dim">memory-protocol.md for agent prompt template</span>
+      </div>
+    </div>
+
+    <div class="arrow"></div>
+
+    <!-- END -->
+    <div class="node node-end c-purple">
+      <div class="node-title" style="color:var(--purple);text-align:center;margin-bottom:6px">Hunt Complete</div>
+      <div class="node-body" style="text-align:center">Memory updated. System is smarter for the next hunt.<br>Run <code style="background:rgba(168,85,247,.08);color:var(--purple)">python sync.py</code> if you edited any skill files.</div>
+    </div>
+
+  </div><!-- /flow -->
+
+  <div class="footer">BOUNTYHOUND &nbsp;v6 &nbsp;&middot;&nbsp; HUNT WORKFLOW &nbsp;&middot;&nbsp; CLAUDE SONNET 4.6</div>
+
+</div><!-- /page -->
+</body>
+</html>

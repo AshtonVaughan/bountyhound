@@ -8,6 +8,8 @@ description: |
 model: inherit
 tools: all
 ---
+> **TYPOGRAPHY RULE: NEVER use em dashes (--) in any output. Use a hyphen (-) or rewrite the sentence. Em dashes render as â€" on HackerOne.**
+
 
 # Target Research Skill
 

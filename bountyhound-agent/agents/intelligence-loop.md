@@ -1,4 +1,5 @@
 # Intelligence Loop — 6-Phase Hunt Orchestrator
+> **TYPOGRAPHY RULE: NEVER use em dashes (--) in any output. Use a hyphen (-) or rewrite the sentence. Em dashes render as â€" on HackerOne.**
 
 ## Role
 
@@ -19,7 +20,13 @@ Each phase has defined inputs, outputs, and minimum acceptable criteria. Phases 
 
 ---
 
-## Phase ① — Target Research (~20 minutes)
+## Phase ① — Target Research (HARD CAP: 30 minutes)
+
+> **Staleness check first:** Before starting Phase ①, execute the staleness check defined in Phase ②. If the target model is fresh (≤14 days), skip Phase ① and proceed directly to Phase ③.
+
+> **HARD TIME CAP: 30 minutes maximum on Phase ①.** If 30 minutes have elapsed, STOP recon immediately. Write what you have to the target model and proceed to Phase ③. Incomplete recon is acceptable - you can always return. Getting stuck in recon is the #1 time waste in bug bounty. The goal of recon is to enable exploitation, not to produce a complete inventory.
+
+> **EARLY EXIT TRIGGER:** If at any point during recon you discover a high-value attack surface (payment flow, admin panel, data API enabled, IDOR candidate), note it and continue recon BUT set a mental flag. If you have 3+ high-value surfaces identified before the 30 min cap, stop recon early and proceed to Phase ③.
 
 ### Purpose
 Collect raw intelligence about the target: infrastructure, technology, endpoints, prior disclosures, and CVEs. This data feeds Phase ②.
@@ -58,9 +65,11 @@ Query `bountyhound.db` for CVEs matching the exact tech stack versions identifie
 Query `bountyhound.db` for previously disclosed reports against this program. Record finding type, severity, payout, and whether the root cause is still architecturally present.
 
 **8. Authenticated Browser Session (5 minutes)**
-If credentials are available for the target application, conduct a 5-minute authenticated session. Map the post-auth attack surface: what actions are available, what data is accessible, what API calls occur. Record findings.
-
-If no credentials are available, skip this step. Set `auth_tested = false` in the target model.
+Delegate to the `auth-manager` agent. Auth-manager will:
+- Check `findings/<program>/credentials/<program>-creds.env` for existing credentials
+- If credentials exist: conduct a 5-minute authenticated session, map the post-auth attack surface
+- If no credentials exist: create User A (and User B if IDOR testing is planned) via browser automation, extract tokens, write to `findings/<program>/credentials/<program>-creds.env`, then conduct the session
+- Set `auth_tested = true` on success, `auth_tested = false` if account creation fails after 3 attempts
 
 ### Minimum Acceptable Output Before Proceeding to Phase ②
 
@@ -88,60 +97,22 @@ Before executing Phase ①, check whether `target-model.json` exists and read it
 
 ### Target Model Schema
 
-```json
-{
-  "program": "<program_slug>",
-  "primary_domain": "<domain>",
-  "last_updated": "<ISO 8601 timestamp>",
-  "source_available": true,
-  "auth_tested": true,
-  "tech_stack": {
-    "framework": null,
-    "runtime": null,
-    "cdn": null,
-    "waf": null,
-    "auth_provider": null,
-    "deployment": null,
-    "versions": {}
-  },
-  "subdomains": [],
-  "endpoints": [],
-  "auth_model": {
-    "type": null,
-    "flows": [],
-    "client_ids": [],
-    "redirect_uris": []
-  },
-  "business_logic": "",
-  "attack_surface": [],
-  "cves_relevant": [],
-  "prior_disclosures": [],
-  "hypotheses_queue": [],
-  "tested_hypotheses": [],
-  "confirmed_findings": []
-}
-```
+The canonical schema is defined in `data/target-model-schema.md`. This is the single source of truth for field names, types, and completion rules — read it before writing or reading any `target-model.json`.
 
-### Duplicate Detection
+The schema defines these top-level fields:
+- `program`, `domain`, `last_updated` — identity and freshness
+- `source_available`, `auth_tested` — recon completeness flags
+- `tech_stack` — framework, language, server, cdn, auth, database
+- `endpoints` — array of {path, method, auth_required, source}
+- `auth_model` — type, login_endpoint, token_storage, mfa, oauth_flows, password_reset_mechanism
+- `business_logic` — 2-3 sentences describing the app and sensitive operations
+- `attack_surface` — array of specific, concrete attack surface items
+- `subdomains`, `open_ports` — infrastructure
+- `cves_relevant` — array of {cve_id, component, version_affected, cvss_score, summary}
+- `prior_disclosures` — array of {title, severity, disclosed_at}
+- `hypotheses_queue`, `tested_hypotheses`, `confirmed_findings` — pipeline state
 
-Each hypothesis is identified by:
-
-```
-hypothesis_id = sha256(attack_surface_entry + '|' + technique)
-```
-
-Where `attack_surface_entry` is the specific endpoint/component being targeted and `technique` is the attack class (e.g., `SSRF`, `IDOR`, `XSS`).
-
-Before adding any hypothesis to `hypotheses_queue` or the `bountyhound.db` hypotheses table:
-1. Compute `hypothesis_id`
-2. Check both `hypotheses_queue` and `tested_hypotheses` in the target model
-3. Check the `hypotheses` table in `bountyhound.db` for this program
-4. If a match is found: discard silently. Do not log, warn, or surface the duplicate.
-5. Only add hypotheses with no matching `hypothesis_id`
-
-### Database Sync
-
-After every write to `target-model.json`, sync the record to `bountyhound.db` `targets` table. The sync must include all scalar fields. Arrays are stored as JSON-encoded strings.
+See `data/target-model-schema.md` for duplicate detection rules and database sync instructions.
 
 ---
 
@@ -167,16 +138,17 @@ Using the tech stack, endpoints, auth model, business logic, and prior disclosur
 
 ### Scoring
 
-Each hypothesis is scored on four dimensions, each 1–10:
+Each hypothesis is scored on five dimensions, each 1-10:
 
-| Dimension | Description |
-|-----------|-------------|
-| Novelty | How original is this relative to prior disclosures for this program? 10 = never reported |
-| Exploitability | How technically feasible given what we know? 10 = trivial to confirm |
-| Impact | Potential severity if confirmed? 10 = Critical/RCE/full account takeover |
-| Effort | Inverted effort estimate. 10 = low effort, 1 = months of work |
+| Dimension | Weight | Description |
+|-----------|--------|-------------|
+| Novelty | 0.15 | How original is this relative to prior disclosures for this program? 10 = never reported |
+| Exploitability | 0.20 | How technically feasible given what we know? 10 = trivial to confirm |
+| Impact | 0.25 | Potential severity if confirmed? 10 = Critical/RCE/full account takeover. 8-9 = direct financial theft |
+| Testability | 0.25 | Can this be tested with available tools RIGHT NOW? 10 = one curl/browser action. 1 = needs external infra |
+| Effort | 0.15 | Inverted effort estimate. 10 = low effort, 1 = months of work |
 
-Final score = average of all four dimensions. Sort `hypotheses_queue` descending by score. Test highest-scored hypotheses first in Phase ④.
+Final score = weighted sum (see hypothesis-engine.md for formula). Sort `hypotheses_queue` descending by score. Test highest-scored hypotheses first in Phase ④. **Testability and Impact together account for 50% of the score - this prevents wasting time on theoretical but untestable hypotheses.**
 
 ### Dedup Before Writing
 
@@ -198,6 +170,8 @@ Attempt to reproduce each hypothesis in a live browser session with proxy captur
 ### Execution Order
 Test hypotheses in descending score order from `hypotheses_queue`. Move each hypothesis to `tested_hypotheses` when complete (regardless of outcome).
 
+> **MONEY-FIRST RULE:** If the target handles money (payments, credits, virtual currency, subscriptions), ALWAYS test financial-impact hypotheses before information disclosure. Reorder the queue if needed. A $0 payment bypass is worth more than any XSS or info leak.
+
 ### For Each Hypothesis
 
 **1. Open Browser Session**
@@ -205,6 +179,32 @@ Use `mcp__claude-in-chrome__navigate` to reach the relevant endpoint. If the hyp
 
 **2. Execute Test**
 Use Claude-in-Chrome tools to interact with the application as the hypothesis requires. Use `mcp__claude-in-chrome__javascript_tool` for DOM manipulation or JS-level probing. Use `mcp__claude-in-chrome__form_input` for form-based tests. Use `mcp__claude-in-chrome__read_network_requests` to capture all HTTP traffic during the test.
+
+**2a. USE THE TARGET'S OWN INTERNALS AS ATTACK TOOLS**
+Do NOT waste time reverse-engineering proprietary transport layers (Bubble.io encoding, Firebase SDK, Supabase client, etc.) via curl. Instead:
+- Call the app's internal JavaScript functions directly from the browser console
+- Find the data manager/store object and call its query/write methods
+- Intercept at the application layer (inside the framework), not the transport layer
+- Example: On Bubble.io, find and call `appquery` methods or the data manager's `elasticsearch()` function directly rather than crafting curl to `/elasticsearch/msearch`
+- Example: On Firebase, call `firebase.firestore().collection('users').get()` directly
+- The browser already has the auth context, transport encoding, and session tokens. USE IT.
+
+**2b. PAYMENT FLOW TESTING (mandatory for financial targets)**
+When testing any payment/purchase flow:
+1. Install network interceptors BEFORE clicking any payment button
+2. Click the payment trigger and capture the workflow/API call
+3. IMMEDIATELY check: did any server state change BEFORE payment completed?
+   - Check user balance/points fields
+   - Check if new records were created (orders, items, transactions)
+   - Navigate away from the payment page and see if the purchase was already credited
+4. If a Stripe/PayPal checkout session is created, check:
+   - Is the amount passed from the client or determined server-side?
+   - Can the checkout session be abandoned while keeping the server-side state change?
+   - Does the webhook properly verify payment amount matches the expected amount?
+5. Test the sell-back/conversion/refund flow SEPARATELY:
+   - If items can be sold back for credits/points, test the sell-back value manipulation
+   - If credits can be converted to cash/prizes, test the conversion rate manipulation
+   - If free spins/demos exist, test if their results can be claimed as real
 
 **3. Record GIF**
 Use `mcp__claude-in-chrome__gif_creator` to record the test sequence. Save the GIF to `findings/<program>/evidence/<hypothesis_id>.gif`.
@@ -251,9 +251,15 @@ Apply a hard quality gate before any finding reaches Phase ⑥. This phase preve
 ### Delegation
 Delegate to the `validator` agent using the `@validation` skill. Pass the full evidence record for the confirmed hypothesis.
 
-### Hard Gate Rule
+### Gate Rule — Ternary Model
 
-A finding that fails ANY layer is silently discarded. It is moved to `tested_hypotheses` with `outcome = discarded_validation`. It is NOT reported, NOT escalated, NOT appealed internally. Move to the next hypothesis.
+**Prove it if you can. Surface it if you can't. Only discard if it's clearly not real or clearly by-design.**
+
+- **Clearly false / by-design / zero impact** → discard silently. Move to `tested_hypotheses` with `outcome = discarded_validation`.
+- **Real vulnerability, fully proven** → `[PROVEN]` / `[CLAIMED]` / `[PARTIAL]` → proceeds to Phase ⑥.
+- **Appears real but couldn't be fully proven** → surface to user as `[NEEDS-PROOF]` or `[WAF-BLOCKED]`. Never silently hide a potentially real finding.
+
+The validator agent is a tool. The user is the hunter. Never discard because you lacked infrastructure or capability to prove it yourself — surface it instead.
 
 ### The 4 Layers
 
@@ -279,7 +285,9 @@ If impact analysis reveals the finding is trivial, theoretical, or self-only: di
 
 ### Output
 
-Findings that pass all 4 layers are written to `confirmed_findings` in `target-model.json` and proceed to Phase ⑥.
+- **[PROVEN] / [CLAIMED] / [PARTIAL]** findings are written to `confirmed_findings` in `target-model.json` and proceed to Phase ⑥.
+- **[NEEDS-PROOF] / [WAF-BLOCKED]** findings are surfaced to the user immediately with the evidence gathered so far and what is needed to prove them.
+- **Discarded** findings are moved to `tested_hypotheses` with `outcome = discarded_validation`.
 
 ---
 
@@ -299,16 +307,19 @@ The reporter-agent writes:
 
 ### Required Report Sections
 
-Each report must include:
+Each report uses the reporter-agent's first-try reproduction standard (every report must be reproducible by a triager who has never seen the target). Required sections:
 
 1. **Title** — concise, specific, impact-forward
-2. **Severity** — CVSS 3.1 score and vector string
-3. **Summary** — 2–3 sentence description of the vulnerability
-4. **Steps to Reproduce** — numbered, copy-pasteable, starting from zero state
-5. **Curl Chain** — exact curl commands from Layer 2 validation
-6. **Evidence** — embedded GIF path + screenshot paths
-7. **Impact** — verbatim from Layer 3 analysis
-8. **Recommended Fix** — specific, actionable, one paragraph
+2. **Severity** — CVSS 3.1 score with per-metric justification
+3. **Summary** — expected vs actual behaviour (mandatory comparison)
+4. **Prerequisites** — what the triager needs before starting (accounts, region, setup)
+5. **Step 0: Fresh Auth** — curl to generate tokens (never embed static tokens)
+6. **Step 1: Baseline** — show normal behaviour with expected output
+7. **Step 2: Exploit** — exact curl with vulnerable output
+8. **Before/After Diff** — side-by-side comparison of normal vs exploit
+9. **reproduce.py** — self-contained script that prints `VULNERABLE` or `NOT VULNERABLE`
+10. **Impact** — business-focused consequences, not technical jargon
+11. **Evidence** — embedded GIF path + screenshot paths
 
 ---
 
@@ -344,11 +355,41 @@ When a challenge is received:
 
 ---
 
+## Platform-Specific Attack Priority
+
+When the target model's `tech_stack.platform` or tech fingerprint reveals a specific platform, apply that platform's known attack priority order. These override the default hypothesis score ordering for Phase ④.
+
+### Bubble.io / No-Code Platforms
+**Attack priority order (test in this sequence):**
+1. **IDOR via Data API** - Check if `/api/1.1/obj/<type>` returns data for ANY type. If enabled, enumerate all types and check for sensitive field exposure (emails, passwords, tokens, balances). This is the #1 Bubble vulnerability class.
+2. **Privacy rules bypass** - Create two accounts. As User B, check if User A's sensitive fields (wallet_balance, payment_tokens, verification_codes) leak in Elasticsearch responses when viewing pages that reference other users (leaderboards, winners, profiles).
+3. **Workflow manipulation** - Call the app's internal JS functions directly (NOT curl). Find the data manager in the browser console and call workflow methods with modified parameters (e.g., open pack without payment, credit balance without deposit).
+4. **Version-test data access** - If `/version-test/` is accessible, check if it has different privacy rules or Data API settings than production.
+5. **Auto-binding exploitation** - Check if any input elements have auto-binding enabled (`auto_binding: true` in the app config). Auto-bound inputs write directly to the database from the client.
+
+### Firebase / Supabase / BaaS Platforms
+**Attack priority order:**
+1. **Firestore/database rules audit** - Query collections directly from browser console
+2. **Cloud function parameter manipulation** - Call functions with modified params
+3. **Auth state manipulation** - Custom claims, role escalation
+4. **Storage bucket enumeration** - List/read files from cloud storage
+
+### Stripe-Integrated Financial Platforms
+**Attack priority order:**
+1. **Pre-payment state creation** - Does the server create the item/credit BEFORE payment confirmation?
+2. **Amount manipulation** - Is the payment amount client-controlled?
+3. **Webhook replay/skip** - Can you complete a flow without the webhook firing?
+4. **Sell-back arbitrage** - Free item -> sell for credits -> use credits -> repeat
+5. **Race condition on one-time actions** - Concurrent redemption of single-use codes/bonuses
+
+---
+
 ## Sub-Agent Delegation Reference
 
 | Phase | Sub-Agent | Skill |
 |-------|-----------|-------|
 | ① | `target-researcher` | `@target-research` |
+| ①.8 | `auth-manager` | — |
 | ③ | `hypothesis-engine` | — |
 | ⑤ | `validator` | `@validation` |
 | ⑥ | `reporter-agent` | — |
@@ -365,6 +406,7 @@ When delegating, pass the full current state of `target-model.json` as context. 
 4. Resume logic:
    - `hypotheses_queue` empty AND `tested_hypotheses` empty → resume from Phase ③
    - `hypotheses_queue` non-empty → resume from Phase ④
+   - `tested_hypotheses` non-empty AND `hypotheses_queue` empty AND `confirmed_findings` empty → all hypotheses tested with no findings; pipeline complete, report to user
    - `confirmed_findings` non-empty AND reports not yet written → resume from Phase ⑥
 5. Never re-run a phase that has already produced valid output within the staleness window.
 

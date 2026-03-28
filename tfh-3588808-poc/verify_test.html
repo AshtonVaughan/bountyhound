@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>World ID Test — Proof Capture</title>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: monospace; background: #0a0a0a; color: #e0e0e0; padding: 2rem; }
+    h1 { color: #00ff88; }
+    button { background: #00ff88; color: #000; border: none; padding: 0.6rem 1.4rem; font-size: 1rem; cursor: pointer; border-radius: 4px; margin: 0.5rem 0; }
+    pre { background: #111; padding: 1rem; border: 1px solid #333; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
+    #status { color: #ffaa00; margin: 1rem 0; }
+    #proof-box { display: none; }
+    .label { color: #888; font-size: 0.85rem; margin-top: 0.8rem; }
+  </style>
+</head>
+<body>
+  <h1>World ID Proof Capture</h1>
+  <p>App: <code>app_7c45d9d16bd9e044dfc09800fdfa68d8</code> | Action: <code>vote</code></p>
+  <p>Use the <a href="https://simulator.worldcoin.org" target="_blank" style="color:#00ff88">Worldcoin Simulator</a> to approve the verification.</p>
+
+  <button onclick="startVerification()">Start Verification</button>
+
+  <div id="status">Waiting...</div>
+  <div id="proof-box">
+    <div class="label">Full proof response (paste into PoC):</div>
+    <pre id="proof-output"></pre>
+    <div class="label">nullifier_hash:</div>
+    <pre id="nullifier"></pre>
+    <div class="label">merkle_root:</div>
+    <pre id="merkle"></pre>
+    <div class="label">proof:</div>
+    <pre id="proof"></pre>
+    <button onclick="copyProof()">Copy Full JSON</button>
+  </div>
+
+  <!-- IDKit v2 via CDN -->
+  <script type="module">
+    import { IDKitWidget, VerificationLevel } from 'https://cdn.jsdelivr.net/npm/@worldcoin/idkit-core@1.3.1/+esm';
+
+    window.startVerification = function() {
+      document.getElementById('status').textContent = 'Opening World ID verification...';
+
+      // IDKit core — open verification modal programmatically
+      const widget = IDKitWidget({
+        app_id: 'app_7c45d9d16bd9e044dfc09800fdfa68d8',
+        action: 'vote',
+        verification_level: VerificationLevel.Orb,
+        onSuccess: (result) => {
+          document.getElementById('status').textContent = 'SUCCESS — proof captured!';
+          document.getElementById('status').style.color = '#00ff88';
+          document.getElementById('proof-box').style.display = 'block';
+          document.getElementById('proof-output').textContent = JSON.stringify(result, null, 2);
+          document.getElementById('nullifier').textContent = result.nullifier_hash;
+          document.getElementById('merkle').textContent = result.merkle_root;
+          document.getElementById('proof').textContent = result.proof;
+          console.log('PROOF:', JSON.stringify(result));
+        },
+        onError: (err) => {
+          document.getElementById('status').textContent = 'Error: ' + JSON.stringify(err);
+          document.getElementById('status').style.color = '#ff4444';
+        },
+      });
+
+      widget.open();
+    };
+
+    window.copyProof = function() {
+      navigator.clipboard.writeText(document.getElementById('proof-output').textContent);
+    };
+  </script>
+</body>
+</html>

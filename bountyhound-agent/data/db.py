@@ -11,6 +11,32 @@ DB_PATH = Path(__file__).parent / "bountyhound.db"
 class BountyHoundDB:
     def __init__(self, db_path: Path = DB_PATH):
         self.db_path = db_path
+        self._migrate()
+
+    def _migrate(self) -> None:
+        """Create schema if missing, then apply incremental column migrations."""
+        schema_sql = Path(__file__).parent / "schema.sql"
+        with closing(self._conn()) as conn:
+            # Check if schema has been applied
+            tables = {r[0] for r in conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            ).fetchall()}
+            if "programs" not in tables:
+                # First-time init: apply schema.sql
+                if schema_sql.exists():
+                    conn.executescript(schema_sql.read_text())
+                    conn.commit()
+
+            # Incremental migrations — safe to retry (always wrapped in try/except)
+            migrations = [
+                "ALTER TABLE findings ADD COLUMN currency TEXT NOT NULL DEFAULT 'AUD'",
+            ]
+            for sql in migrations:
+                try:
+                    conn.execute(sql)
+                    conn.commit()
+                except sqlite3.OperationalError:
+                    pass  # column already exists
 
     def _conn(self) -> sqlite3.Connection:
         conn = sqlite3.connect(self.db_path)
@@ -137,12 +163,12 @@ class BountyHoundDB:
             cursor = conn.execute("""
                 INSERT INTO findings
                     (hypothesis_id, target_id, title, severity, cvss_score,
-                     cvss_vector, status, report_path)
-                VALUES (?, ?, ?, ?, ?, ?, 'draft', ?)
+                     cvss_vector, status, report_path, currency)
+                VALUES (?, ?, ?, ?, ?, ?, 'draft', ?, ?)
             """, (
                 f.get('hypothesis_id'), f['target_id'], f['title'],
                 f.get('severity'), f.get('cvss_score'), f.get('cvss_vector'),
-                f.get('report_path'),
+                f.get('report_path'), f.get('currency', 'AUD'),
             ))
             conn.commit()
             return cursor.lastrowid

@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS findings (
     status          TEXT    NOT NULL DEFAULT 'draft' CHECK(status IN ('draft','submitted','confirmed','informational','duplicate','out_of_scope')),
     report_path     TEXT,
     payout          REAL,
+    currency        TEXT    NOT NULL DEFAULT 'AUD',
     submitted_at    TIMESTAMP,
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
