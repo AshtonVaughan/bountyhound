@@ -25,3 +25,5 @@ venv/
 .DS_Store
 Thumbs.db
 .worktrees/
+proxy-engine/projects/autosave.json
+tfh-3588808-poc/idkit-app/node_modules/
