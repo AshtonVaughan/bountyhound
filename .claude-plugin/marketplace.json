@@ -1,0 +1,20 @@
+{
+  "name": "bountyhound-marketplace",
+  "description": "BountyHound Bug Bounty Hunting Tools for Claude Code",
+  "owner": {
+    "name": "AshtonVaughan",
+    "email": "vaughn@example.com"
+  },
+  "plugins": [
+    {
+      "name": "bountyhound-agent",
+      "description": "Smart bug bounty hunting with intelligence loop, novel hypothesis engine, 4-layer validation, and 24+ skills. Includes /hunt, /creds, /agents, /feedback commands.",
+      "version": "6.2.0",
+      "source": "./bountyhound-agent",
+      "author": {
+        "name": "AshtonVaughan",
+        "email": "vaughn@example.com"
+      }
+    }
+  ]
+}
