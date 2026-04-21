@@ -1,0 +1,14 @@
+# Blockchain & Smart Contract Testing Requirements
+
+# Static Analysis
+slither-analyzer==0.10.4
+mythril==0.24.8
+
+# Testing Frameworks
+eth-brownie==1.20.6
+web3==7.6.0
+py-solc-x==2.0.3
+
+# Utilities
+colorama==0.4.6
+requests==2.32.3

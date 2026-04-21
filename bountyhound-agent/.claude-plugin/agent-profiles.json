@@ -1,0 +1,135 @@
+{
+  "profiles": {
+    "core": {
+      "description": "Always active - essential hunting agents",
+      "agents": [
+        "phased-hunter",
+        "discovery-engine",
+        "poc-validator",
+        "reporter-agent",
+        "auth-manager",
+        "rejection-filter",
+        "submission-optimizer"
+      ]
+    },
+    "web": {
+      "description": "Web application testing (activate for web targets)",
+      "agents": [
+        "authentication-bypass-tester",
+        "business-logic-tester",
+        "cache-poisoning-tester",
+        "cors-tester",
+        "cors-policy-analyzer",
+        "csrf-tester",
+        "deserialization-tester",
+        "file-upload-security",
+        "host-header-injection-tester",
+        "http-method-testing-agent",
+        "http-request-smuggling-tester",
+        "insecure-deserialization-gadget-scanner",
+        "mass-assignment-tester",
+        "mfa-bypass-tester",
+        "open-redirect-tester",
+        "prototype-pollution-tester",
+        "race-condition-tester",
+        "server-side-template-injection-tester",
+        "smuggling-tester",
+        "websocket-tester"
+      ]
+    },
+    "injection": {
+      "description": "Injection testing (XSS, SQLi, command injection, etc.)",
+      "agents": [
+        "dalfox-xss",
+        "ldap-injection-tester",
+        "nosql-injection-tester",
+        "os-command-injection-tester",
+        "path-traversal-tester",
+        "sqlmap-injection",
+        "ssrf-tester",
+        "xxe-tester"
+      ]
+    },
+    "api": {
+      "description": "API-specific testing (REST/GraphQL/gRPC)",
+      "agents": [
+        "api-abuse-detection-bypasser",
+        "api-authentication-chain-tester",
+        "api-documentation-scanner",
+        "api-endpoint-parameter-miner",
+        "api-fuzzer",
+        "api-gateway-bypass-tester",
+        "api-rate-limit-tester",
+        "api-response-analyzer",
+        "api-schema-analyzer",
+        "api-security-best-practices-validator",
+        "api-versioning-tester",
+        "graphql-advanced-tester",
+        "graphql-enumerator",
+        "grpc-security-tester",
+        "mobile-api-tester"
+      ]
+    },
+    "auth": {
+      "description": "Authentication and session security testing",
+      "agents": [
+        "cookie-security-analyzer",
+        "jwt-analyzer",
+        "oauth-flow-tester"
+      ]
+    },
+    "recon": {
+      "description": "Reconnaissance and OSINT",
+      "agents": [
+        "arjun-params",
+        "dns-record-analyzer",
+        "dnsx-resolver",
+        "feroxbuster-discovery",
+        "ffuf-fuzzer",
+        "gau-urls",
+        "interactsh-oast",
+        "katana-crawler",
+        "robots-txt-analyzer",
+        "security-txt-validator",
+        "trufflehog-secrets"
+      ]
+    },
+    "headers": {
+      "description": "HTTP security headers and transport security",
+      "agents": [
+        "content-security-policy-tester",
+        "hsts-analyzer",
+        "http-security-headers-scanner",
+        "permissions-policy-analyzer",
+        "referrer-policy-analyzer",
+        "tls-ssl-configuration-tester",
+        "x-content-type-options-tester",
+        "x-frame-options-tester"
+      ]
+    },
+    "advanced": {
+      "description": "Advanced attacks and privilege escalation",
+      "agents": [
+        "privilege-escalation-chain-builder"
+      ]
+    }
+  },
+  "default_enabled": ["core", "web", "api", "injection"],
+  "auto_activate": {
+    "description": "Auto-activate profiles based on target detection",
+    "rules": [
+      {
+        "condition": "tech_stack contains 'graphql'",
+        "activate": ["api"]
+      },
+      {
+        "condition": "security_headers missing OR weak CSP detected",
+        "activate": ["headers"]
+      },
+      {
+        "condition": "auth_flow detected OR login_page found",
+        "activate": ["auth"]
+      }
+    ]
+  }
+}

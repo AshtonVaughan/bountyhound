@@ -1,0 +1,26 @@
+# Mobile App Security Testing Requirements
+
+# Frida - Dynamic instrumentation
+frida==16.5.9
+frida-tools==12.5.0
+objection==1.11.0
+
+# APK Analysis
+androguard==4.1.2
+python-magic==0.4.27
+
+# iOS Analysis
+biplist==1.0.3
+pycryptodome==3.20.0
+
+# Mobile API Testing
+mitmproxy==10.4.2
+requests==2.32.3
+
+# Code Analysis
+capstone==5.0.7
+lief==0.15.1
+
+# Utilities
+colorama==0.4.6
+tqdm==4.67.1

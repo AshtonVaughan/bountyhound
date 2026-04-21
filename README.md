@@ -2,292 +2,147 @@
   <img src="https://raw.githubusercontent.com/AshtonVaughan/bountyhound/master/assets/logo.svg" alt="BountyHound Logo" width="400">
 </p>
 
-<h1 align="center">BountyHound</h1>
+<h1 align="center">BountyHound v7.0</h1>
 
 <p align="center">
-  <strong>Claude Code Plugin for AI-Powered Bug Bounty Automation</strong><br>
-  <em>Just tell Claude what to hunt — it handles the rest</em>
+  <strong>The most comprehensive bug bounty and CTF plugin for Claude Code.</strong><br>
+  <em>7 autonomous agents. 41 attack skills. One command: /hunt</em>
 </p>
 
 <p align="center">
-  <a href="https://github.com/AshtonVaughan/bountyhound/releases"><img src="https://img.shields.io/github/v/release/AshtonVaughan/bountyhound?style=flat-square&color=blue" alt="Release"></a>
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10+-blue?style=flat-square&logo=python&logoColor=white" alt="Python"></a>
   <a href="https://github.com/AshtonVaughan/bountyhound/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License"></a>
   <a href="https://claude.ai/claude-code"><img src="https://img.shields.io/badge/Claude_Code-Plugin-blueviolet?style=flat-square" alt="Claude Code"></a>
 </p>
 
-<p align="center">
-  <a href="#-what-is-bountyhound">About</a> •
-  <a href="#-how-it-works">How It Works</a> •
-  <a href="#-installation">Installation</a> •
-  <a href="#-usage">Usage</a> •
-  <a href="#-capabilities">Capabilities</a>
-</p>
-
 ---
 
-<br>
+## What is BountyHound?
+
+BountyHound is a Claude Code plugin that gives Claude structured offensive security methodology. It's not a scanner - it's a reasoning harness that teaches the model HOW to think about targets, not just what payloads to throw.
 
 ```
-██████╗  ██████╗ ██╗   ██╗███╗   ██╗████████╗██╗   ██╗██╗  ██╗ ██████╗ ██╗   ██╗███╗   ██╗██████╗
-██╔══██╗██╔═══██╗██║   ██║████╗  ██║╚══██╔══╝╚██╗ ██╔╝██║  ██║██╔═══██╗██║   ██║████╗  ██║██╔══██╗
-██████╔╝██║   ██║██║   ██║██╔██╗ ██║   ██║    ╚████╔╝ ███████║██║   ██║██║   ██║██╔██╗ ██║██║  ██║
-██╔══██╗██║   ██║██║   ██║██║╚██╗██║   ██║     ╚██╔╝  ██╔══██║██║   ██║██║   ██║██║╚██╗██║██║  ██║
-██████╔╝╚██████╔╝╚██████╔╝██║ ╚████║   ██║      ██║   ██║  ██║╚██████╔╝╚██████╔╝██║ ╚████║██████╔╝
-╚═════╝  ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚═════╝
+/hunt hackerone.com/program-name
 ```
 
-<br>
+Claude reads the program scope, fingerprints the stack, generates scored hypotheses, tests them through the browser, validates findings through a 4-layer gate, and writes H1-ready reports. Every finding must be proven with HTTP evidence before it's surfaced.
 
-## 🎯 What is BountyHound?
+## v7.0 - What Changed
 
-BountyHound is a **Claude Code plugin** that turns Claude into an autonomous bug bounty hunter. Instead of manually running security tools, you just describe what you want in natural language — Claude orchestrates everything.
+v7.0 merges three skill frameworks (BountyHound + TriageEngine + Apex Hunter) into one unified harness:
 
-```
-You: "Scan the HackerOne program at hackerone.com/security"
+- **MENTALITY** - Never-quit reasoning engine. Failures generate new hypotheses, not defeat.
+- **11 Model-Native Reasoning techniques** - Implementation inference, cross-feature state attacks, statistical oracles, crypto decision trees, cache key isolation, and more.
+- **Trust boundary + developer assumption analysis** - Find WHERE authorization decisions happen, then find WHERE developers assumed wrong.
+- **Non-obvious surface checklist** - Import/export, webhook handlers, legacy API versions, file processing pipelines, admin preview features.
+- **Variant analysis** - One confirmed finding automatically generates 5 follow-up hypotheses.
+- **Zero-day logic** - Logic flaw investigation, blast radius escalation.
+- **CTF mode** - Full Pwn/Rev/Crypto/Web/Forensics/Misc methodology.
+- **Anomaly hunting** - Baseline normal behavior first, then hunt deviations.
+- **Confidence tags** - CONFIRMED/INFERRED/ASSUMED on every claim. No fabricated findings.
 
-Claude: *fetches program scope*
-        *enumerates subdomains*
-        *probes live hosts*
-        *AI-selects high-value targets*
-        *runs vulnerability scans*
-        *prioritizes findings*
-        *generates report*
-
-Claude: "Found 2 critical, 5 high severity issues. Here's your report..."
-```
-
-**No commands to memorize. No tool flags to remember. Just talk to Claude.**
-
-<br>
-
-## ⚡ How It Works
+## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                                                                             │
-│     YOU                          CLAUDE CODE                   BOUNTYHOUND │
-│   ┌─────┐                        ┌─────────┐                   ┌─────────┐ │
-│   │     │  "scan this program"   │         │   orchestrates    │  Recon  │ │
-│   │ 👤  │ ───────────────────▶  │  🤖 AI  │ ───────────────▶  │  Scan   │ │
-│   │     │                        │         │                   │  Report │ │
-│   └─────┘  ◀─────────────────── └─────────┘ ◀───────────────  └─────────┘ │
-│              prioritized report              findings & data               │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+bountyhound-agent/
+  agents/          7 autonomous sub-agents (recon, hypothesis, validation, reporting, auth, source audit)
+  skills/          41 attack methodology skills (injection, auth, IDOR, cloud, mobile, blockchain, RE, etc.)
+  engine/          Python tools (H1 API, IDOR harness, JS differ, nuclei gen, scope monitor, CVE feed)
+  data/            Databases (operational DB, H1 programs, CVE reference)
+  memory/          Cross-target patterns, hunting playbook, per-target history
+  commands/        /hunt, /creds, /agents, /feedback, /campaign
 ```
 
-1. **You describe the task** in plain English
-2. **Claude understands** your intent and context
-3. **BountyHound executes** — running subfinder, httpx, nuclei, nmap
-4. **AI analyzes results** — prioritizing targets and findings
-5. **Claude reports back** with actionable intelligence
+## The Hunt Pipeline
 
-<br>
+```
+/hunt <target>
+  |
+  v
+  1. TARGET RESEARCH     - subdomain enum, port scan, tech fingerprint, JS crawl, CVE lookup
+  2. TARGET MODEL        - structured JSON model of the target's attack surface
+  3. HYPOTHESIS GEN      - scored queue: CVE baseline + novel hypotheses + cross-target patterns
+  4. BROWSER TESTING     - Chrome automation + proxy capture + GIF recording per hypothesis
+  5. 4-LAYER VALIDATION  - by-design check, browser repro, curl chain, impact analysis
+  6. REPORT              - H1-ready markdown with reproduce.py, before/after diff, CVSS
+```
 
-## 🚀 Installation
+## 41 Attack Skills
 
-### 1. Install Security Tools
+| Category | Skills |
+|----------|--------|
+| **Injection** | SQL, XSS, SSTI, XXE, OS command, blind injection (OOB) |
+| **Auth** | JWT, OAuth/OIDC/SAML, session attacks, MFA bypass |
+| **Access Control** | IDOR/BOLA harness, data exfiltration, business logic |
+| **Network** | Request smuggling, WAF bypass, rate limit bypass, stealth mode |
+| **Crypto** | Weak RNG, padding oracle, KDF audit, algorithm downgrade |
+| **Advanced** | Race conditions, deserialization, side-channel, memory corruption |
+| **Platform** | Cloud (AWS/GCP/Azure), mobile (Android/iOS), blockchain, IoT/hardware |
+| **AI** | LLM prompt injection, jailbreak chains |
+| **Binary** | Reverse engineering, kernel/anti-cheat, DLL injection |
+| **Operations** | Parallel hunting, campaign planner, headless mode, nuclei template gen |
+| **Reporting** | Exploit gate, report psychology, H1 API submission, feedback handling |
+
+## Installation
+
+Add BountyHound as a marketplace plugin in Claude Code:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "bountyhound-marketplace": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/AshtonVaughan/bountyhound.git"
+      }
+    }
+  }
+}
+```
+
+Then enable `bountyhound-agent@bountyhound-marketplace` in your plugins.
+
+### Optional: Security Tools
+
+BountyHound adapts to what's available. Full mode uses these if installed:
 
 ```bash
 # Subdomain enumeration
-go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
-
-# HTTP probing
-go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
-
+go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
 # Vulnerability scanning
-go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
-
+go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
 # Port scanning
-# Ubuntu/Debian: sudo apt install nmap
-# macOS: brew install nmap
-# Windows: choco install nmap
+# apt install nmap / brew install nmap / choco install nmap
 ```
 
-### 2. Install BountyHound Plugin
+Without these tools, BountyHound operates in browser-only mode using Chrome automation and curl.
 
-```bash
-# Clone and install
-git clone https://github.com/AshtonVaughan/bountyhound.git
-cd bountyhound
-pip install -e .
-```
-
-### 3. Configure
-
-Create `~/.bountyhound/config.yaml`:
-
-```yaml
-api_keys:
-  groq: "your-groq-api-key"  # Get free at console.groq.com
-
-campaign:
-  browser: chrome      # For cookie extraction
-  max_targets: 100     # AI target selection limit
-```
-
-### 4. Add to Claude Code
-
-Add BountyHound as a plugin in your Claude Code configuration.
-
-<br>
-
-## 💬 Usage
-
-Just talk to Claude naturally. Here are some examples:
-
-### Campaign Scanning
-```
-"Run a full scan on the Bugcrowd program at bugcrowd.com/tesla"
-
-"Hunt for bugs on hackerone.com/security - focus on critical issues"
-
-"Start a campaign against the YesWeHack program, max 50 targets"
-```
-
-### Targeted Recon
-```
-"Enumerate subdomains for example.com"
-
-"Find all live hosts on target.io and check what tech they're running"
-
-"Do a full recon on webapp.net - subdomains, ports, everything"
-```
-
-### Vulnerability Scanning
-```
-"Scan example.com for vulnerabilities"
-
-"Run nuclei against the subdomains we found"
-
-"Check api.target.com for common security issues"
-```
-
-### Reporting
-```
-"Generate a report of findings for example.com"
-
-"Show me the status of all targets"
-
-"What critical vulnerabilities have we found?"
-```
-
-<br>
-
-## 🔧 Capabilities
-
-<table>
-<tr>
-<td width="50%">
-
-### 🤖 AI-Powered Analysis
-- **Smart Target Selection** — Identifies high-value targets from thousands of subdomains
-- **Finding Prioritization** — Ranks vulnerabilities by exploitability and bounty potential
-- **Scope Parsing** — Extracts domains from any bug bounty program page
-- **Report Generation** — Executive summaries with next steps
-
-</td>
-<td width="50%">
-
-### 🔍 Reconnaissance
-- **Subdomain Enumeration** — Subfinder integration
-- **HTTP Probing** — Live host detection with httpx
-- **Port Scanning** — Service discovery via Nmap
-- **Tech Fingerprinting** — Identify frameworks and versions
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-### 🎯 Vulnerability Scanning
-- **Nuclei Integration** — Thousands of templates
-- **Intelligent Filtering** — Only scans promising targets
-- **Evidence Collection** — Full PoC data for reports
-- **Severity Classification** — Critical/High/Medium/Low
-
-</td>
-<td width="50%">
-
-### 🌐 Platform Support
-- **HackerOne** — Full scope parsing & auth
-- **Bugcrowd** — Program extraction
-- **Intigriti** — Target enumeration
-- **YesWeHack** — Campaign automation
-
-</td>
-</tr>
-</table>
-
-<br>
-
-## 🏗️ Architecture
+## Usage
 
 ```
-bountyhound/
-├── cli.py              # CLI interface (used by Claude)
-├── config.py           # Configuration management
-├── ai/
-│   └── analyzer.py     # Groq LLM for intelligent analysis
-├── browser/
-│   └── session.py      # Cookie extraction & authenticated fetching
-├── campaign/
-│   ├── parser.py       # Base campaign parser
-│   ├── hackerone.py    # HackerOne-specific parsing
-│   ├── bugcrowd.py     # Bugcrowd-specific parsing
-│   ├── intigriti.py    # Intigriti-specific parsing
-│   └── yeswehack.py    # YesWeHack-specific parsing
-├── pipeline/
-│   └── runner.py       # Orchestrates recon → scan → report
-├── recon/
-│   ├── subdomains.py   # Subfinder wrapper
-│   ├── httpx.py        # httpx wrapper
-│   └── ports.py        # Nmap wrapper
-├── scan/
-│   └── nuclei.py       # Nuclei wrapper
-├── report/
-│   └── generators.py   # Markdown/JSON report generation
-└── storage/
-    ├── database.py     # SQLite for persistence
-    └── models.py       # Data models
+/hunt <target>              Full autonomous hunt
+/hunt <h1-program-url>      Hunt with program scope auto-parsed
+/creds list                 Show saved credentials
+/campaign <target>          Multi-session strategic campaign
+/feedback                   Handle H1/Bugcrowd analyst response
 ```
 
+## How It Thinks
 
-## Related Projects
+BountyHound v7.0 doesn't just run tools. It reasons about targets:
 
-- **[bountyhound-agent](https://github.com/AshtonVaughan/bountyhound-agent)** - Claude Code plugin for autonomous swarm-based hunting with parallel agents and persistent state
+1. **Classifies the target** - Web app? Browser extension? Electron? Mobile? API-first?
+2. **Finds trust boundaries** - Where does the app make authorization decisions?
+3. **Identifies broken assumptions** - What did the developer assume that isn't true?
+4. **Applies model-native reasoning** - Implementation inference, cross-feature state, statistical oracles
+5. **Hunts anomalies** - Baselines normal behavior, then investigates deviations
+6. **Chains findings** - Every confirmed signal asks "what does this enable?"
+7. **Never gives up** - Failed hypotheses generate new ones. The queue grows as you learn.
 
-**How they work together:**
-- **bountyhound CLI** (this repo) provides the security reconnaissance and scanning tools
-- **bountyhound-agent** provides the AI orchestration, swarm methodology, and autonomous hunting capabilities
+## Responsible Use
 
-For autonomous multi-agent hunting with session persistence and parallel execution, see bountyhound-agent.
+BountyHound is for authorized security testing only - bug bounty programs, CTF competitions, and authorized pentests. Only test in-scope assets per program rules.
 
-<br>
-<br>
+## License
 
-## 🛡️ Responsible Use
-
-BountyHound is for **authorized security testing only**.
-
-- ✅ Only test targets you have explicit permission to scan
-- ✅ Respect bug bounty program scope and rules
-- ✅ Follow responsible disclosure practices
-- ❌ Never scan unauthorized targets
-- ❌ Don't violate program terms of service
-
-<br>
-
-## 📜 License
-
-MIT License — see [LICENSE](LICENSE) for details.
-
-<br>
-
----
-
-<p align="center">
-  <strong>Happy Hunting! 🎯</strong><br>
-  <sub>A Claude Code plugin for the bug bounty community</sub>
-</p>
+MIT License - see [LICENSE](LICENSE) for details.

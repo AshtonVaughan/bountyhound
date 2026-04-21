@@ -1,0 +1,52 @@
+# Credentials and local config - NEVER COMMIT
+.env
+config/bountyhound-agent.local.md
+*.local.md
+
+# Database with findings
+*.db
+*.sqlite
+
+# Screenshots and evidence
+evidence/
+screenshots/
+
+# Hunt findings directory (contains sensitive data)
+findings/
+
+# Temporary files
+*.tmp
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git worktrees
+.worktrees/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml

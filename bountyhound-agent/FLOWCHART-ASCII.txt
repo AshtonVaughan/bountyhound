@@ -1,0 +1,172 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    BOUNTYHOUND SYSTEM FLOWCHART (ASCII)                      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+                              ┌─────────────┐
+                              │ USER INPUT  │
+                              └──────┬──────┘
+                                     │
+                     ┌───────────────┼───────────────┐
+                     │               │               │
+                     ▼               ▼               ▼
+              ┌──────────┐    ┌──────────┐    ┌──────────┐
+              │  /hunt   │    │  /recon  │    │  /creds  │
+              │  /phunt  │    │  domain  │    │  action  │
+              └────┬─────┘    └────┬─────┘    └────┬─────┘
+                   │               │               │
+                   │               ▼               ▼
+                   │        ┌─────────────┐  ┌────────────┐
+                   │        │  Discovery  │  │    Auth    │
+                   │        │   Engine    │  │  Manager   │
+                   │        └──────┬──────┘  └─────┬──────┘
+                   │               │               │
+                   │               ▼               ▼
+                   │        ┌─────────────┐  ┌────────────┐
+                   │        │  SQLite DB  │  │ .env Files │
+                   │        └─────────────┘  └────┬───────┘
+                   │                              │
+                   ▼                              │
+        ┌──────────────────────┐                 │
+        │  PHASED HUNTER AGENT │◄────────────────┘
+        └──────────┬───────────┘
+                   │
+    ┌──────────────┼──────────────┐
+    │              │              │
+    ▼              ▼              ▼
+┌───────┐      ┌───────┐      ┌───────┐      ┌──────────┐      ┌──────────┐
+│PHASE 1│ ───► │PHASE 2│ ───► │PHASE 3│ ───► │ PHASE 4  │ ───► │ PHASE 5  │
+│ RECON │      │DISCOV │      │ TEST  │      │ EXPLOIT  │      │ REPORT   │
+│~5 min │      │~2 min │      │~15 min│      │ ~5 min   │      │ ~3 min   │
+└───┬───┘      └───┬───┘      └───┬───┘      └────┬─────┘      └────┬─────┘
+    │              │              │               │                  │
+    ▼              ▼              │               ▼                  ▼
+┌────────┐    ┌──────────┐       │        ┌──────────────┐   ┌───────────┐
+│subfinder│   │   LLM    │       │        │POC VALIDATOR │   │  REPORT   │
+│ httpx   │   │ Pattern  │       │        │  (curl test) │   │  VERIFIED │
+│ nmap    │   │Synthesis │       │        └──────┬───────┘   │  EVIDENCE │
+└────────┘    └────┬─────┘       │               │           └───────────┘
+                   │              │         ┌─────┴─────┐
+                   ▼              │         │           │
+             ┌──────────┐         │         ▼           ▼
+             │Hypothesis│         │    ┌────────┐  ┌────────┐
+             │  Cards   │         │    │VERIFIED│  │DISCARD │
+             │ (5-15)   │         │    └────────┘  └────────┘
+             └────┬─────┘         │
+                  │               │
+                  └───────────────┤
+                                  │
+                  ┌───────────────┴───────────────┐
+                  │                               │
+                  ▼                               ▼
+          ┌──────────────┐              ┌──────────────┐
+          │   TRACK A    │              │   TRACK B    │
+          │ CLI SCANNING │              │   BROWSER    │
+          │   (nuclei)   │              │   TESTING    │
+          └──────┬───────┘              └──────┬───────┘
+                 │                             │
+                 │                             ├──► XSS Testing
+                 │                             ├──► SQLi Testing
+                 │                             ├──► IDOR Testing
+                 │                             └──► Auth Bypass
+                 │                             │
+                 └──────────┬──────────────────┘
+                            │
+                            ▼
+                    ┌───────────────┐
+                    │ MERGE FINDINGS│
+                    └───────┬───────┘
+                            │
+                            ▼
+                    ┌───────────────┐
+                    │   VALIDATE    │
+                    │  (curl POC)   │
+                    └───────┬───────┘
+                            │
+                    ┌───────┴───────┐
+                    │               │
+                    ▼               ▼
+            ┌───────────┐   ┌───────────┐
+            │  VERIFIED │   │  DISCARD  │
+            │  FINDINGS │   │   FALSE   │
+            └─────┬─────┘   │  POSITIVE │
+                  │         └───────────┘
+                  │
+                  ▼
+          ┌───────────────┐
+          │ REPORTER AGENT│
+          └───────┬───────┘
+                  │
+                  ▼
+        ┌─────────────────────┐
+        │      OUTPUT         │
+        ├─────────────────────┤
+        │ ~/bounty-findings/  │
+        │   ├── REPORT.md     │
+        │   ├── VERIFIED-*.md │
+        │   └── screenshots/  │
+        └─────────────────────┘
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                           KEY COMPONENTS                                     ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  📊 TOTAL HUNT TIME: ~29 minutes (automated)                                 ║
+║                                                                              ║
+║  🔍 PHASE 1: RECON                                                           ║
+║     - subfinder: subdomain enumeration                                       ║
+║     - httpx: live host detection                                             ║
+║     - nmap: port scanning                                                    ║
+║     - Data stored in SQLite                                                  ║
+║                                                                              ║
+║  🧠 PHASE 2: DISCOVERY ENGINE (LLM)                                          ║
+║     - Pattern synthesis                                                      ║
+║     - Anomaly detection                                                      ║
+║     - Technology fingerprinting                                              ║
+║     - Generates 5-15 hypothesis cards                                        ║
+║                                                                              ║
+║  ⚡ PHASE 3: PARALLEL TESTING                                                ║
+║     Track A: CLI scanning (nuclei templates)                                 ║
+║     Track B: Browser testing (XSS, SQLi, IDOR, Auth)                         ║
+║     Both run simultaneously for speed                                        ║
+║                                                                              ║
+║  🎯 PHASE 4: EXPLOIT & VALIDATE                                              ║
+║     - POC Validator uses curl to verify every finding                        ║
+║     - False positives automatically discarded                                ║
+║     - Evidence collection: screenshots, logs, requests                       ║
+║                                                                              ║
+║  📝 PHASE 5: REPORTING                                                       ║
+║     - Reporter Agent generates markdown reports                              ║
+║     - Calculates severity and bounty estimates                               ║
+║     - Organizes all evidence into structured output                          ║
+║                                                                              ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                          AGENT COUNTS                                        ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  Total Agents:              155                                              ║
+║  Skills:                      6                                              ║
+║  Commands:                    4 (/hunt, /phunt, /recon, /creds)              ║
+║                                                                              ║
+║  Core Agents:                16 (orchestrator, discovery, api, injection)    ║
+║  API Testing:                25                                              ║
+║  Injection Testing:          20                                              ║
+║  Authorization:              15                                              ║
+║  Cloud/Infrastructure:       18                                              ║
+║  Mobile Security:            12                                              ║
+║  Advanced Analysis:          20                                              ║
+║  Automation & Reporting:     15                                              ║
+║  Protocol Testing:           14                                              ║
+║                                                                              ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                         SUCCESS METRICS                                      ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  Targets Tested:            10+ (AT&T, DoorDash, Shopify, Epic, etc.)        ║
+║  Vulnerabilities Found:     40+ critical/high severity                       ║
+║  Estimated Bounty Value:    $300K+ across all targets                        ║
+║  Average Hunt Time:         29 minutes                                       ║
+║  False Positive Rate:       <5% (thanks to POC validation)                   ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝

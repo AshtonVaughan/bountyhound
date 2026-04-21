@@ -26,3 +26,14 @@ venv/
 .coverage
 htmlcov/
 *.db
+*.dll
+*.exe
+*.so
+*.dylib
+bountyhound-agent/tools/x64dbg/
+bountyhound-agent/memory/identity.md
+bountyhound-agent/findings/
+bountyhound-agent/engine/omnihack/injection/*.exe
+reports/
+*.env
+!.env.example
