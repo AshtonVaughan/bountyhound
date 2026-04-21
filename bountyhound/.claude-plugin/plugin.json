@@ -1,0 +1,16 @@
+{
+  "name": "bountyhound",
+  "description": "Bug bounty and CTF hacking harness for Claude Code. 7 autonomous agents, 41 attack skills, never-quit reasoning engine. v7.0.0.",
+  "version": "7.0.0",
+  "author": {
+    "name": "AshtonVaughan"
+  },
+  "license": "MIT",
+  "keywords": [
+    "bug-bounty",
+    "security",
+    "pentesting",
+    "ctf",
+    "hacking"
+  ]
+}
