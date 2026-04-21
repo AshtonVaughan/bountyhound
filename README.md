@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/AshtonVaughan/bountyhound/master/assets/logo.svg" alt="BountyHound Logo" width="400">
-</p>
-
 <h1 align="center">BountyHound v7.0</h1>
 
 <p align="center">
